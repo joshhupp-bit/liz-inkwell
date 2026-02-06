@@ -80,6 +80,50 @@
             align-items: center;
         }
 
+        .goals-header-widget {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .goal-mini-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .goal-mini-label {
+            font-size: 0.7rem;
+            color: #94A3B8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .goal-mini-value {
+            font-size: 0.9rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .goal-mini-progress {
+            height: 4px;
+            width: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 0.25rem;
+        }
+
+        .goal-mini-progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+            transition: width 0.3s ease;
+        }
+
         .sidebar-toggle {
             background: rgba(233, 30, 99, 0.15);
             border: 1px solid rgba(233, 30, 99, 0.3);
@@ -3053,6 +3097,22 @@
             </div>
         </div>
         <div class="header-actions">
+            <div class="goals-header-widget" id="goalsHeaderWidget">
+                <div class="goal-mini-stat">
+                    <div class="goal-mini-label">Words Today</div>
+                    <div class="goal-mini-value" id="headerWordsValue">0 / 1000</div>
+                    <div class="goal-mini-progress">
+                        <div class="goal-mini-progress-fill" id="headerWordsProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="goal-mini-stat">
+                    <div class="goal-mini-label">Session Time</div>
+                    <div class="goal-mini-value" id="headerTimeValue">0m / 60m</div>
+                    <div class="goal-mini-progress">
+                        <div class="goal-mini-progress-fill" id="headerTimeProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
             <button class="sidebar-toggle" onclick="toggleSidebar()">
                 <span id="sidebarToggleIcon">☰</span> Tools
             </button>
@@ -4540,7 +4600,8 @@
         // ========== GRAMMAR CHECKING ==========
 
         async function checkGrammar() {
-            const content = document.getElementById('editorContent').value;
+            const editor = document.getElementById('editorContent');
+            const content = editor.innerText || editor.textContent || '';
             
             if (!content.trim()) {
                 alert('Please write some content first');
@@ -4879,13 +4940,15 @@ Please be concise and focus on the most important issues.`
             }
         }
 
-        // Listen for text selection
+        // Listen for text selection (contenteditable version)
         document.addEventListener('selectionchange', () => {
             const editor = document.getElementById('editorContent');
             if (document.activeElement === editor) {
-                const selection = editor.value.substring(editor.selectionStart, editor.selectionEnd);
-                if (selection && selection.trim().length > 0) {
-                    selectedText = selection;
+                const selection = window.getSelection();
+                const selectedText = selection.toString().trim();
+                if (selectedText && selectedText.length > 0) {
+                    // Store selected text for AI operations
+                    window.lastSelectedText = selectedText;
                 }
             }
         });
@@ -5273,20 +5336,56 @@ Please be concise and focus on the most important issues.`
             const totalWords = chapters.reduce((sum, ch) => sum + ch.wordCount, 0);
             const todayWords = Math.min(totalWords, dailyWordGoal);
             
-            // Update daily words display
-            document.getElementById('todayWordsValue').textContent = todayWords;
+            // Update daily words display in modal
+            const todayWordsValue = document.getElementById('todayWordsValue');
+            if (todayWordsValue) {
+                todayWordsValue.textContent = todayWords;
+            }
             const dailyProgress = Math.min((todayWords / dailyWordGoal) * 100, 100);
-            document.getElementById('dailyWordsProgressBar').style.width = `${dailyProgress}%`;
-            document.getElementById('dailyWordsProgressText').textContent = 
-                `${todayWords} / ${dailyWordGoal} words (${Math.round(dailyProgress)}%)`;
+            const dailyWordsProgressBar = document.getElementById('dailyWordsProgressBar');
+            if (dailyWordsProgressBar) {
+                dailyWordsProgressBar.style.width = `${dailyProgress}%`;
+            }
+            const dailyWordsProgressText = document.getElementById('dailyWordsProgressText');
+            if (dailyWordsProgressText) {
+                dailyWordsProgressText.textContent = `${todayWords} / ${dailyWordGoal} words (${Math.round(dailyProgress)}%)`;
+            }
+            
+            // Update header widget
+            const headerWordsValue = document.getElementById('headerWordsValue');
+            if (headerWordsValue) {
+                headerWordsValue.textContent = `${todayWords} / ${dailyWordGoal}`;
+            }
+            const headerWordsProgress = document.getElementById('headerWordsProgress');
+            if (headerWordsProgress) {
+                headerWordsProgress.style.width = `${dailyProgress}%`;
+            }
             
             // Calculate session time
             const sessionMinutes = Math.floor((Date.now() - sessionStartTime) / 60000);
-            document.getElementById('sessionTimeValue').textContent = `${sessionMinutes}m`;
+            const sessionTimeValue = document.getElementById('sessionTimeValue');
+            if (sessionTimeValue) {
+                sessionTimeValue.textContent = `${sessionMinutes}m`;
+            }
             const timeProgress = Math.min((sessionMinutes / sessionTimeGoal) * 100, 100);
-            document.getElementById('sessionTimeProgressBar').style.width = `${timeProgress}%`;
-            document.getElementById('sessionTimeProgressText').textContent = 
-                `${sessionMinutes} / ${sessionTimeGoal} minutes (${Math.round(timeProgress)}%)`;
+            const sessionTimeProgressBar = document.getElementById('sessionTimeProgressBar');
+            if (sessionTimeProgressBar) {
+                sessionTimeProgressBar.style.width = `${timeProgress}%`;
+            }
+            const sessionTimeProgressText = document.getElementById('sessionTimeProgressText');
+            if (sessionTimeProgressText) {
+                sessionTimeProgressText.textContent = `${sessionMinutes} / ${sessionTimeGoal} minutes (${Math.round(timeProgress)}%)`;
+            }
+            
+            // Update header widget time
+            const headerTimeValue = document.getElementById('headerTimeValue');
+            if (headerTimeValue) {
+                headerTimeValue.textContent = `${sessionMinutes}m / ${sessionTimeGoal}m`;
+            }
+            const headerTimeProgress = document.getElementById('headerTimeProgress');
+            if (headerTimeProgress) {
+                headerTimeProgress.style.width = `${timeProgress}%`;
+            }
         }
 
         // Update goals every minute
