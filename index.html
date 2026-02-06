@@ -3469,6 +3469,57 @@
     </div>
 
     <script>
+        // Storage polyfill - must run FIRST before any other code
+        if (typeof window.storage === 'undefined') {
+            console.log('Storage API not available. Using localStorage fallback.');
+            window.storage = {
+                async get(key) {
+                    try {
+                        const value = localStorage.getItem(key);
+                        return value ? { key, value, shared: false } : null;
+                    } catch (e) {
+                        console.error('Storage get error:', e);
+                        return null;
+                    }
+                },
+                async set(key, value) {
+                    try {
+                        localStorage.setItem(key, value);
+                        return { key, value, shared: false };
+                    } catch (e) {
+                        console.error('Storage set error:', e);
+                        return null;
+                    }
+                },
+                async delete(key) {
+                    try {
+                        localStorage.removeItem(key);
+                        return { key, deleted: true, shared: false };
+                    } catch (e) {
+                        console.error('Storage delete error:', e);
+                        return null;
+                    }
+                },
+                async list(prefix) {
+                    try {
+                        const keys = [];
+                        for (let i = 0; i < localStorage.length; i++) {
+                            const key = localStorage.key(i);
+                            if (!prefix || key.startsWith(prefix)) {
+                                keys.push(key);
+                            }
+                        }
+                        return { keys, prefix, shared: false };
+                    } catch (e) {
+                        console.error('Storage list error:', e);
+                        return { keys: [] };
+                    }
+                }
+            };
+        }
+    </script>
+
+    <script>
         let chapters = [];
         let currentChapterId = null;
         let saveTimeout = null;
@@ -4263,61 +4314,13 @@
 
         // Initialize on load
         window.addEventListener('DOMContentLoaded', async function() {
-            // Check if storage API is available
-            if (typeof window.storage === 'undefined') {
-                console.error('Storage API not available. Using fallback localStorage.');
-                // Create fallback storage using localStorage
-                window.storage = {
-                    async get(key) {
-                        try {
-                            const value = localStorage.getItem(key);
-                            return value ? { key, value, shared: false } : null;
-                        } catch (e) {
-                            console.error('Storage get error:', e);
-                            return null;
-                        }
-                    },
-                    async set(key, value) {
-                        try {
-                            localStorage.setItem(key, value);
-                            return { key, value, shared: false };
-                        } catch (e) {
-                            console.error('Storage set error:', e);
-                            return null;
-                        }
-                    },
-                    async delete(key) {
-                        try {
-                            localStorage.removeItem(key);
-                            return { key, deleted: true, shared: false };
-                        } catch (e) {
-                            console.error('Storage delete error:', e);
-                            return null;
-                        }
-                    },
-                    async list(prefix) {
-                        try {
-                            const keys = [];
-                            for (let i = 0; i < localStorage.length; i++) {
-                                const key = localStorage.key(i);
-                                if (!prefix || key.startsWith(prefix)) {
-                                    keys.push(key);
-                                }
-                            }
-                            return { keys, prefix, shared: false };
-                        } catch (e) {
-                            console.error('Storage list error:', e);
-                            return { keys: [] };
-                        }
-                    }
-                };
-            }
-            
             try {
+                console.log('Initializing app...');
                 await initApp();
+                console.log('App initialized successfully');
             } catch (error) {
                 console.error('Failed to initialize app:', error);
-                alert('Failed to initialize the app. Please check the console for details.');
+                alert('Failed to initialize the app. Error: ' + error.message);
             }
         });
 
