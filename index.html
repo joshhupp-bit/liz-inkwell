@@ -1,0 +1,5609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writer's Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream: #FFFFFF;
+            --ink: #2C3E50;
+            --sepia: #64748B;
+            --gold: #E91E63;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --border: #E2E8F0;
+            --bg-light: #F8FAFC;
+            --bg-gradient: linear-gradient(135deg, #F0F4F8 0%, #E8EEF5 100%);
+            --primary: #E91E63;
+            --primary-light: #FCE4EC;
+            --secondary: #3B82F6;
+            --secondary-light: #DBEAFE;
+            --accent: #8B5CF6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Serif 4', serif;
+            background: var(--bg-gradient);
+            color: var(--ink);
+            overflow-x: hidden;
+        }
+
+        /* Top Header */
+        .top-header {
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-branding {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .app-logo {
+            font-size: 2rem;
+        }
+
+        .app-title-section h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #E91E63 0%, #F48FB1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        .app-subtitle {
+            font-size: 0.8rem;
+            color: #94A3B8;
+            margin-top: 0.25rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .sidebar-toggle {
+            background: rgba(233, 30, 99, 0.15);
+            border: 1px solid rgba(233, 30, 99, 0.3);
+            color: #F48FB1;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 0px;
+            height: calc(100vh - 70px);
+            gap: 0;
+        }
+        
+        .app-container.hide-character-panel {
+            grid-template-columns: 280px 1fr 0px;
+        }
+
+        .app-container.sidebar-collapsed {
+            grid-template-columns: 0px 1fr 0px;
+        }
+
+        .app-container.sidebar-collapsed.hide-character-panel {
+            grid-template-columns: 0px 1fr 0px;
+        }
+
+        /* Sidebar - Chapters */
+        .sidebar {
+            background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+            color: var(--cream);
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            border-right: 1px solid rgba(226, 232, 240, 0.1);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .app-container.sidebar-collapsed .sidebar {
+            padding: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sidebar h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+            letter-spacing: 0.5px;
+        }
+
+        .view-characters-btn {
+            width: 100%;
+            padding: 0.875rem;
+            margin-top: 1rem;
+            background: rgba(59, 130, 246, 0.15);
+            color: #60A5FA;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .view-characters-btn:hover {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .ai-visuals-btn {
+            width: 100%;
+            padding: 0.875rem;
+            margin-top: 1rem;
+            background: rgba(139, 92, 246, 0.15);
+            color: #A78BFA;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .ai-visuals-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* AI Image Generation Modal */
+        .ai-image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ai-image-modal.show {
+            display: flex;
+        }
+
+        .ai-image-modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .ai-image-modal h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            color: var(--ink);
+        }
+
+        .ai-image-modal-subtitle {
+            font-size: 0.9rem;
+            color: var(--sepia);
+            margin-bottom: 2rem;
+        }
+
+        .image-type-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .image-type-option {
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .image-type-option:hover {
+            border-color: var(--accent);
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .image-type-option.selected {
+            border-color: var(--accent);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .image-type-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .image-type-label {
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .image-prompt-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .image-prompt-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .image-prompt-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 120px;
+            background: white;
+        }
+
+        .image-prompt-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .image-style-selector {
+            margin-bottom: 1.5rem;
+        }
+
+        .image-style-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--ink);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .image-styles {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .image-style-chip {
+            padding: 0.5rem 0.75rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .image-style-chip:hover {
+            border-color: var(--accent);
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .image-style-chip.selected {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .generate-image-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .generate-image-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .generate-image-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .generated-image-container {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .generated-image-container.show {
+            display: block;
+        }
+
+        .generated-image {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        .image-action-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .image-action-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .close-image-modal-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--sepia);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-image-modal-btn:hover {
+            background: var(--ink);
+        }
+
+        /* Writing Goals Button */
+        .writing-goals-btn {
+            width: 100%;
+            padding: 0.875rem;
+            margin-top: 1rem;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34D399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .writing-goals-btn:hover {
+            background: #10B981;
+            color: white;
+            border-color: #10B981;
+        }
+
+        .share-collab-btn {
+            width: 100%;
+            padding: 0.875rem;
+            margin-top: 1rem;
+            background: rgba(236, 72, 153, 0.15);
+            color: #EC4899;
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .share-collab-btn:hover {
+            background: #EC4899;
+            color: white;
+            border-color: #EC4899;
+        }
+
+        /* Collaboration Modal */
+        .collab-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .collab-modal.show {
+            display: flex;
+        }
+
+        .collab-modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .collab-modal h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            color: var(--ink);
+        }
+
+        .collab-modal-subtitle {
+            font-size: 0.9rem;
+            color: var(--sepia);
+            margin-bottom: 2rem;
+        }
+
+        .collab-add-section {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .collab-add-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 1rem;
+        }
+
+        .collab-input-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .collab-email-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.95rem;
+        }
+
+        .collab-email-input:focus {
+            outline: none;
+            border-color: #EC4899;
+        }
+
+        .collab-permission-select {
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.95rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .collab-add-btn {
+            padding: 0.75rem 1.5rem;
+            background: #EC4899;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .collab-add-btn:hover {
+            background: #DB2777;
+        }
+
+        .collab-list-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 1rem;
+        }
+
+        .collab-list {
+            list-style: none;
+        }
+
+        .collab-item {
+            background: var(--bg-light);
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collab-info {
+            flex: 1;
+        }
+
+        .collab-email {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 0.25rem;
+        }
+
+        .collab-permission-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .collab-permission-badge.view {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3B82F6;
+        }
+
+        .collab-permission-badge.comment {
+            background: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+        }
+
+        .collab-permission-badge.edit {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+        }
+
+        .collab-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .collab-change-permission-btn {
+            padding: 0.375rem 0.75rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .collab-change-permission-btn:hover {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .collab-remove-btn {
+            padding: 0.375rem 0.75rem;
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .collab-remove-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .close-collab-modal-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--sepia);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-collab-modal-btn:hover {
+            background: var(--ink);
+        }
+
+        /* Writing Goals Modal */
+        .writing-goals-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .writing-goals-modal.show {
+            display: flex;
+        }
+
+        .writing-goals-modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .writing-goals-modal h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            color: var(--ink);
+        }
+
+        .writing-goals-modal-subtitle {
+            font-size: 0.9rem;
+            color: var(--sepia);
+            margin-bottom: 2rem;
+        }
+
+        .goal-section {
+            margin-bottom: 2rem;
+        }
+
+        .goal-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 1rem;
+        }
+
+        .goal-stat-card {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .goal-stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .goal-stat-label {
+            font-size: 0.875rem;
+            color: var(--sepia);
+        }
+
+        .goal-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .goal-progress-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .goal-progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+            transition: width 0.3s ease;
+        }
+
+        .goal-progress-text {
+            font-size: 0.75rem;
+            color: var(--sepia);
+            text-align: right;
+        }
+
+        .goal-input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .goal-input-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .goal-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.95rem;
+            background: white;
+        }
+
+        .goal-input:focus {
+            outline: none;
+            border-color: #10B981;
+        }
+
+        .save-goals-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 0.75rem;
+        }
+
+        .save-goals-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .close-goals-modal-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: white;
+            color: var(--sepia);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-goals-modal-btn:hover {
+            background: var(--border);
+        }
+
+        /* Project Management */
+        .project-selector {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.1);
+        }
+
+        .current-project {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+        }
+
+        .current-project-name {
+            font-size: 0.95rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .switch-project-btn {
+            background: rgba(233, 30, 99, 0.15);
+            border: 1px solid rgba(233, 30, 99, 0.3);
+            color: #F48FB1;
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .switch-project-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .new-project-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .new-project-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Project Modal */
+        .project-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .project-modal.show {
+            display: flex;
+        }
+
+        .project-modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .project-modal h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            color: var(--ink);
+        }
+
+        .project-modal-subtitle {
+            font-size: 0.9rem;
+            color: var(--sepia);
+            margin-bottom: 2rem;
+        }
+
+        .project-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .project-item {
+            background: var(--bg-light);
+            padding: 1.25rem;
+            margin-bottom: 0.75rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .project-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .project-item.active {
+            background: var(--primary-light);
+            border-left-color: var(--primary);
+        }
+
+        .project-item-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+        }
+
+        .project-item-meta {
+            font-size: 0.8rem;
+            color: var(--sepia);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .project-item-actions {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .project-action-btn {
+            padding: 0.35rem 0.75rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .project-action-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .project-action-btn.delete:hover {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .create-project-section {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .create-project-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 1rem;
+        }
+
+        .project-input-group {
+            margin-bottom: 1rem;
+        }
+
+        .project-input-label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .project-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.95rem;
+            background: white;
+        }
+
+        .project-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .create-project-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #E91E63 0%, #F06292 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .create-project-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+        }
+
+        .close-project-modal-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: white;
+            color: var(--sepia);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-project-modal-btn:hover {
+            background: var(--border);
+        }
+
+        /* Series Management */
+        .series-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--accent);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .series-info-section {
+            background: rgba(139, 92, 246, 0.05);
+            padding: 1.25rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .series-info-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+
+        .series-project-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .series-project-name {
+            font-size: 0.875rem;
+            color: var(--ink);
+        }
+
+        .series-project-order {
+            font-size: 0.75rem;
+            color: var(--sepia);
+            margin-left: 0.5rem;
+        }
+
+        .remove-series-link-btn {
+            padding: 0.25rem 0.5rem;
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all 0.2s ease;
+        }
+
+        .remove-series-link-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .add-series-link-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .add-series-link-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 0.75rem;
+        }
+
+        .series-link-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .series-link-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .add-series-link-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .add-series-link-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .linked-resources-panel {
+            background: var(--bg-light);
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .linked-resources-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 1rem;
+        }
+
+        .resource-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .resource-toggle:hover {
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .resource-toggle-label {
+            font-size: 0.875rem;
+            color: var(--ink);
+        }
+
+        .resource-count {
+            font-size: 0.75rem;
+            color: var(--sepia);
+            background: var(--bg-light);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .linked-characters-view {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+        }
+
+        .linked-character-item {
+            padding: 0.75rem;
+            background: var(--bg-light);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--accent);
+        }
+
+        .linked-character-name {
+            font-weight: 600;
+            color: var(--ink);
+            font-size: 0.9rem;
+        }
+
+        .linked-character-source {
+            font-size: 0.75rem;
+            color: var(--sepia);
+            font-style: italic;
+            margin-top: 0.25rem;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.875rem;
+            color: #94A3B8;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .chapter-list {
+            list-style: none;
+        }
+
+        .chapter-list-container {
+            max-height: calc(100vh - 520px);
+            min-height: 200px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            margin-bottom: 1rem;
+            padding-right: 0.5rem;
+        }
+
+        .chapter-item {
+            padding: 0.625rem 0.875rem;
+            margin-bottom: 0.375rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .chapter-item:hover {
+            background: rgba(233, 30, 99, 0.15);
+            border-left-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .chapter-item.active {
+            background: rgba(233, 30, 99, 0.2);
+            border-left-color: var(--primary);
+        }
+
+        .chapter-number {
+            font-size: 0.7rem;
+            color: #F48FB1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .chapter-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chapter-word-count {
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        .add-chapter-btn {
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1rem;
+            background: linear-gradient(135deg, #E91E63 0%, #F06292 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+        }
+
+        .add-chapter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.4);
+        }
+
+        /* Main Editor */
+        .editor-section {
+            background: white;
+            padding: 3rem 4rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .editor-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .editor-title-input {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            border: none;
+            background: transparent;
+            width: 100%;
+            color: var(--ink);
+            padding: 0.5rem 0;
+            margin-bottom: 1rem;
+        }
+
+        .editor-title-input:focus {
+            outline: none;
+            color: var(--sepia);
+        }
+
+        .editor-meta {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.875rem;
+            color: var(--sepia);
+        }
+
+        .editor-content {
+            font-size: 1.125rem;
+            line-height: 1.9;
+            color: var(--ink);
+            min-height: 500px;
+            border: none;
+            background: transparent;
+            width: 100%;
+            padding: 1rem 0;
+            font-family: 'Source Serif 4', serif;
+            outline: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .editor-content:focus {
+            outline: none;
+        }
+
+        .editor-content:empty:before {
+            content: attr(data-placeholder);
+            color: #94A3B8;
+            font-style: italic;
+        }
+
+        .toolbar {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+        }
+
+        .toolbar-btn {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            color: var(--ink);
+        }
+
+        .toolbar-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .toolbar-btn.active {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .toolbar-separator {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+            margin: 0 0.5rem;
+        }
+
+        .color-picker-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .color-picker-btn {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .color-picker-btn:hover {
+            background: var(--bg-light);
+            border-color: var(--primary);
+        }
+
+        .color-preview {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+        }
+
+        .color-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 0.5rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: none;
+        }
+
+        .color-dropdown.show {
+            display: block;
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+        }
+
+        .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            border-color: var(--ink);
+        }
+
+        /* Comment System */
+        .comment-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            color: #F59E0B;
+            font-weight: 600;
+        }
+
+        .comment-btn:hover {
+            background: #F59E0B;
+            color: white;
+            border-color: #F59E0B;
+        }
+
+        .comment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .comment-modal.show {
+            display: flex;
+        }
+
+        .comment-modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .comment-modal h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--ink);
+        }
+
+        .comment-selected-text {
+            background: var(--bg-light);
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 3px solid #F59E0B;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--sepia);
+        }
+
+        .comment-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.95rem;
+            min-height: 100px;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: #F59E0B;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .comment-action-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .comment-action-btn.save {
+            background: #F59E0B;
+            color: white;
+        }
+
+        .comment-action-btn.save:hover {
+            background: #D97706;
+        }
+
+        .comment-action-btn.cancel {
+            background: var(--bg-light);
+            color: var(--sepia);
+            border: 2px solid var(--border);
+        }
+
+        .comment-action-btn.cancel:hover {
+            background: var(--border);
+        }
+
+        .comments-panel {
+            position: fixed;
+            right: 0;
+            top: 70px;
+            width: 350px;
+            height: calc(100vh - 70px);
+            background: white;
+            border-left: 1px solid var(--border);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 800;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .comments-panel.show {
+            transform: translateX(0);
+        }
+
+        .comments-panel-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comments-panel-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .close-comments-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--sepia);
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .close-comments-btn:hover {
+            color: var(--ink);
+        }
+
+        .comments-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .comment-item {
+            background: var(--bg-light);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 3px solid #F59E0B;
+        }
+
+        .comment-author {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+        }
+
+        .comment-timestamp {
+            font-size: 0.75rem;
+            color: var(--sepia);
+            margin-bottom: 0.75rem;
+        }
+
+        .comment-quoted-text {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-style: italic;
+            color: var(--sepia);
+            margin-bottom: 0.75rem;
+            border-left: 2px solid #F59E0B;
+        }
+
+        .comment-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--ink);
+        }
+
+        .comment-item-actions {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .comment-item-btn {
+            padding: 0.25rem 0.5rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .comment-item-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .comment-item-btn.delete:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .toggle-comments-btn {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            color: var(--ink);
+        }
+
+        .toggle-comments-btn:hover {
+            background: #F59E0B;
+            color: white;
+            border-color: #F59E0B;
+        }
+
+        .comments-badge {
+            display: inline-block;
+            background: #F59E0B;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 10px;
+            margin-left: 0.5rem;
+            font-weight: 600;
+        }
+
+        /* AI Assistant Panel */
+        .ai-panel {
+            background: var(--bg-light);
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            border-left: 1px solid var(--border);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .ai-panel h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--ink);
+        }
+
+        .ai-panel-subtitle {
+            font-size: 0.875rem;
+            color: var(--sepia);
+            margin-bottom: 2rem;
+        }
+
+        .prompt-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 100px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .prompt-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .quick-prompts {
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-prompts-label {
+            font-size: 0.875rem;
+            color: var(--sepia);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .quick-prompt-btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.875rem;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .quick-prompt-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .get-suggestions-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .get-suggestions-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .get-suggestions-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .ai-response {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 8px var(--shadow);
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes flashHighlight {
+            0% {
+                background: white;
+            }
+            50% {
+                background: rgba(59, 130, 246, 0.1);
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+            100% {
+                background: var(--bg-light);
+            }
+        }
+
+        .ai-response h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--sepia);
+        }
+
+        .ai-response-content {
+            line-height: 1.7;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--sepia);
+            font-style: italic;
+        }
+
+        .stats-panel {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .stats-panel h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--ink);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .stat-label {
+            color: var(--sepia);
+            font-size: 0.875rem;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .save-indicator {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.4);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .save-indicator.show {
+            opacity: 1;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #94A3B8;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        .context-options {
+            margin: 1rem 0;
+        }
+
+        .context-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .context-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .delete-chapter-btn {
+            margin-top: 0.5rem;
+            padding: 0.375rem;
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .delete-chapter-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .export-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .export-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Floating AI Assistant Bubble */
+        .ai-bubble-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 900;
+        }
+
+        .ai-bubble {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease;
+            font-size: 1.75rem;
+        }
+
+        .ai-bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.5);
+        }
+
+        .ai-bubble.expanded {
+            display: none;
+        }
+
+        .ai-panel-expanded {
+            display: none;
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 480px;
+            max-height: 700px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            z-index: 900;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .ai-panel-expanded.show {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .ai-panel-header {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-panel-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ai-panel-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .ai-panel-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .ai-panel-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ai-response-section {
+            order: 1;
+            margin-bottom: 1.5rem;
+        }
+
+        .ai-controls-section {
+            order: 2;
+        }
+
+        #aiBubbleResponseContainer {
+            min-height: 60px;
+        }
+
+        #aiBubbleResponseContainer:empty::after {
+            content: "💡 Tip: Click a quick action or enter a custom prompt below to get AI suggestions!";
+            display: block;
+            padding: 1.5rem;
+            background: var(--secondary-light);
+            border-radius: 8px;
+            color: var(--secondary);
+            font-size: 0.875rem;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .ai-selected-text {
+            background: var(--secondary-light);
+            border-left: 3px solid var(--secondary);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .ai-selected-label {
+            font-size: 0.75rem;
+            color: var(--secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-quick-action {
+            padding: 0.75rem;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .ai-quick-action:hover {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .ai-custom-prompt-section {
+            margin-top: 1rem;
+        }
+
+        .ai-custom-prompt-label {
+            font-size: 0.875rem;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .ai-bubble-prompt-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 80px;
+            background: white;
+        }
+
+        .ai-bubble-prompt-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px var(--secondary-light);
+        }
+
+        .ai-bubble-submit {
+            width: 100%;
+            padding: 0.875rem;
+            margin-top: 0.75rem;
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .ai-bubble-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .ai-bubble-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .ai-bubble-response {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+            border-left: 3px solid var(--secondary);
+            animation: slideIn 0.4s ease;
+        }
+
+        .ai-bubble-response h4 {
+            font-size: 0.9rem;
+            color: var(--secondary);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .ai-bubble-response-content {
+            line-height: 1.7;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+        }
+
+        .ai-context-options {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .ai-context-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .ai-context-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .ai-context-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--secondary);
+        }
+
+        .ai-quick-prompts-section {
+            margin: 1rem 0;
+        }
+
+        .ai-quick-prompts-label {
+            font-size: 0.875rem;
+            color: var(--ink);
+            margin-bottom: 0.75rem;
+            display: block;
+            font-weight: 600;
+        }
+
+        .ai-quick-prompt-btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.875rem;
+            text-align: left;
+            transition: all 0.2s ease;
+            color: var(--ink);
+        }
+
+        .ai-quick-prompt-btn:hover {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+            transform: translateX(4px);
+        }
+
+        .ai-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 1.25rem 0;
+        }
+
+        /* Character Library Panel */
+        .character-panel {
+            display: none;
+            background: white;
+            padding: 0;
+            overflow: hidden;
+            border-left: none;
+            box-shadow: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 450px;
+            height: 100vh;
+            z-index: 950;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .character-panel.show {
+            display: block;
+            transform: translateX(0);
+        }
+
+        .character-panel-header {
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+            padding: 2rem 1.5rem;
+            color: white;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.1);
+        }
+
+        .character-panel-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .character-panel h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin: 0;
+            color: white;
+        }
+
+        .character-panel-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .character-panel-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .character-panel-body {
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            height: calc(100vh - 150px);
+        }
+
+        .character-panel-subtitle {
+            font-size: 0.875rem;
+            color: var(--sepia);
+            margin-bottom: 1.5rem;
+        }
+
+        .add-character-btn {
+            width: 100%;
+            padding: 0.875rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #E91E63 0%, #F06292 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .add-character-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+        }
+
+        .character-list {
+            list-style: none;
+        }
+
+        .character-card {
+            background: white;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 8px var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .character-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .character-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+        }
+
+        .character-role {
+            font-size: 0.8rem;
+            color: var(--sepia);
+            margin-bottom: 0.75rem;
+            font-style: italic;
+        }
+
+        .character-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .character-metric {
+            font-size: 0.75rem;
+        }
+
+        .character-metric-label {
+            color: var(--sepia);
+            display: block;
+        }
+
+        .character-metric-value {
+            font-weight: 600;
+            color: var(--ink);
+            font-size: 0.95rem;
+        }
+
+        .character-connections {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .connections-label {
+            font-size: 0.75rem;
+            color: var(--sepia);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .connection-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.375rem;
+        }
+
+        .connection-tag {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--primary-light);
+            border-radius: 12px;
+            color: var(--primary);
+            border: 1px solid rgba(233, 30, 99, 0.3);
+        }
+
+        .character-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .character-modal.show {
+            display: flex;
+        }
+
+        .character-modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .character-modal h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            color: var(--ink);
+        }
+
+        .character-form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .character-form-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--sepia);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .character-form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.95rem;
+            background: white;
+        }
+
+        .character-form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .character-form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .character-form-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .character-form-btn {
+            flex: 1;
+            padding: 0.875rem;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .character-form-btn.primary {
+            background: linear-gradient(135deg, #E91E63 0%, #F06292 100%);
+            color: white;
+        }
+
+        .character-form-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+        }
+
+        .character-form-btn.secondary {
+            background: white;
+            color: var(--sepia);
+            border: 2px solid var(--border);
+        }
+
+        .character-form-btn.secondary:hover {
+            background: var(--border);
+        }
+
+        .delete-character-btn {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .delete-character-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .grammar-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grammar-modal.show {
+            display: flex;
+        }
+
+        .grammar-modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .grammar-modal h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            color: var(--ink);
+        }
+
+        .grammar-issue {
+            background: white;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .grammar-issue.error {
+            border-left-color: #dc3545;
+        }
+
+        .grammar-issue.suggestion {
+            border-left-color: #17a2b8;
+        }
+
+        .grammar-issue-type {
+            font-size: 0.75rem;
+            color: var(--sepia);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .grammar-issue-text {
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .grammar-issue-suggestion {
+            font-size: 0.9rem;
+            color: var(--sepia);
+            font-style: italic;
+        }
+
+        .grammar-close-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .grammar-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .toggle-panel-btn {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            margin-left: auto;
+        }
+
+        .toggle-panel-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Version History */
+        .version-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .version-modal.show {
+            display: flex;
+        }
+
+        .version-modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 85vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .version-modal h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            color: var(--ink);
+        }
+
+        .version-modal-subtitle {
+            font-size: 0.9rem;
+            color: var(--sepia);
+            margin-bottom: 1.5rem;
+        }
+
+        .version-content-wrapper {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 1.5rem;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .version-list-container {
+            overflow-y: auto;
+            padding-right: 1rem;
+        }
+
+        .version-list {
+            list-style: none;
+        }
+
+        .version-item {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .version-item:hover {
+            border-left-color: var(--primary);
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .version-item.active {
+            border-left-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .version-timestamp {
+            font-size: 0.85rem;
+            color: var(--sepia);
+            margin-bottom: 0.5rem;
+        }
+
+        .version-info {
+            font-size: 0.8rem;
+            color: var(--ink);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .version-preview-container {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-y: auto;
+            border: 2px solid var(--border);
+        }
+
+        .version-preview-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .version-preview-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+        }
+
+        .version-preview-meta {
+            font-size: 0.85rem;
+            color: var(--sepia);
+        }
+
+        .version-preview-content {
+            line-height: 1.8;
+            font-size: 1rem;
+            color: var(--ink);
+            white-space: pre-wrap;
+        }
+
+        .version-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .version-btn {
+            flex: 1;
+            padding: 0.875rem;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .version-btn.restore {
+            background: linear-gradient(135deg, #E91E63 0%, #F06292 100%);
+            color: white;
+        }
+
+        .version-btn.restore:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+        }
+
+        .version-btn.delete {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 2px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .version-btn.delete:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .version-btn.close {
+            background: white;
+            color: var(--sepia);
+            border: 2px solid var(--border);
+        }
+
+        .version-btn.close:hover {
+            background: var(--border);
+        }
+
+        .version-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .version-empty {
+            text-align: center;
+            padding: 3rem;
+            color: var(--sepia);
+        }
+
+        .version-empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .diff-added {
+            background: rgba(76, 175, 80, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .diff-removed {
+            background: rgba(244, 67, 54, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-header">
+        <div class="app-branding">
+            <div class="app-logo">✨</div>
+            <div class="app-title-section">
+                <h1>Liz's Inkwell</h1>
+                <div class="app-subtitle">Where stories come to life</div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <span id="sidebarToggleIcon">☰</span> Tools
+            </button>
+            <button class="sidebar-toggle" onclick="openCollabModal()" style="background: rgba(236, 72, 153, 0.15); border-color: rgba(236, 72, 153, 0.3); color: #EC4899;">
+                👥 Share
+            </button>
+        </div>
+    </div>
+
+    <div class="app-container" id="appContainer">
+        <!-- Sidebar: Chapter Management -->
+        <aside class="sidebar">
+            <div class="project-selector">
+                <div class="current-project">
+                    <div class="current-project-name" id="currentProjectName">My First Novel</div>
+                    <button class="switch-project-btn" onclick="openProjectModal()">Switch</button>
+                </div>
+                <button class="new-project-btn" onclick="openProjectModal()">+ New Project</button>
+            </div>
+
+            <h2>Chapters</h2>
+            <p class="sidebar-subtitle">Your manuscript</p>
+            
+            <div class="chapter-list-container">
+                <ul class="chapter-list" id="chapterList"></ul>
+            </div>
+            
+            <button class="add-chapter-btn" onclick="addChapter()">+ New Chapter</button>
+            <button class="view-characters-btn" onclick="openCharacterPanel()">👥 Character Library</button>
+            <button class="ai-visuals-btn" onclick="openAIImageModal()">🎨 AI Visuals</button>
+            <button class="writing-goals-btn" onclick="openWritingGoalsModal()">🎯 Writing Goals</button>
+            <button class="export-btn" onclick="exportManuscript()">📥 Export Full Manuscript</button>
+        </aside>
+
+        <!-- Main Editor -->
+        <main class="editor-section">
+            <div class="toolbar">
+                <button class="toolbar-btn" onclick="formatText('bold')" title="Bold"><strong>B</strong></button>
+                <button class="toolbar-btn" onclick="formatText('italic')" title="Italic"><em>I</em></button>
+                <button class="toolbar-btn" onclick="formatText('underline')" title="Underline"><u>U</u></button>
+                
+                <div class="toolbar-separator"></div>
+                
+                <div class="color-picker-wrapper">
+                    <button class="color-picker-btn" onclick="toggleColorPicker('text')" id="textColorBtn">
+                        <div class="color-preview" id="textColorPreview" style="background: #000000;"></div>
+                        <span>Text</span>
+                    </button>
+                    <div class="color-dropdown" id="textColorDropdown">
+                        <div class="color-palette" id="textColorPalette"></div>
+                    </div>
+                </div>
+                
+                <div class="color-picker-wrapper">
+                    <button class="color-picker-btn" onclick="toggleColorPicker('highlight')" id="highlightBtn">
+                        <div class="color-preview" id="highlightPreview" style="background: #FFEB3B;"></div>
+                        <span>Highlight</span>
+                    </button>
+                    <div class="color-dropdown" id="highlightDropdown">
+                        <div class="color-palette" id="highlightPalette"></div>
+                    </div>
+                </div>
+                
+                <div class="toolbar-separator"></div>
+                
+                <button class="comment-btn" onclick="openCommentModal()">💬 Comment</button>
+                <button class="toggle-comments-btn" onclick="toggleCommentsPanel()">
+                    View<span class="comments-badge" id="commentsBadge" style="display: none;">0</span>
+                </button>
+                
+                <div class="toolbar-separator"></div>
+                
+                <button class="toolbar-btn" onclick="checkGrammar()" title="Check Grammar">✓ Grammar</button>
+                <button class="toolbar-btn" onclick="openVersionHistory()" title="Version History">🕐 History</button>
+            </div>
+
+            <div class="editor-header">
+                <input 
+                    type="text" 
+                    class="editor-title-input" 
+                    id="chapterTitle" 
+                    placeholder="Chapter Title"
+                    oninput="saveCurrentChapter()"
+                />
+                <div class="editor-meta">
+                    <span id="wordCount">0 words</span>
+                    <span id="charCount">0 characters</span>
+                    <span id="lastSaved">Auto-saving...</span>
+                </div>
+            </div>
+
+            <div 
+                class="editor-content" 
+                id="editorContent" 
+                contenteditable="true"
+                data-placeholder="Begin writing your story..."
+                oninput="updateStats(); saveCurrentChapter()"
+                onkeydown="handleEditorKeydown(event)"
+            ></div>
+        </main>
+
+        <!-- Placeholder for removed AI panel -->
+        <div style="display: none;"></div>
+    </div>
+
+    <!-- Floating AI Assistant Bubble -->
+    <div class="ai-bubble-container">
+        <div class="ai-bubble" id="aiBubble" onclick="toggleAIPanel()">
+            🤖
+        </div>
+        <div class="ai-panel-expanded" id="aiPanelExpanded">
+            <div class="ai-panel-header">
+                <div class="ai-panel-title">
+                    <span>🤖</span>
+                    <span>Author's AIssistant</span>
+                </div>
+                <button class="ai-panel-close" onclick="toggleAIPanel()">×</button>
+            </div>
+            <div class="ai-panel-body">
+                <!-- Response Section - Moved to TOP -->
+                <div class="ai-response-section">
+                    <div id="aiBubbleResponseContainer"></div>
+                </div>
+
+                <!-- Controls Section - Below response -->
+                <div class="ai-controls-section">
+                    <div id="selectedTextContainer"></div>
+                    
+                    <div class="ai-quick-actions">
+                        <button class="ai-quick-action" onclick="quickAIAction('improve')">✨ Improve</button>
+                        <button class="ai-quick-action" onclick="quickAIAction('grammar')">✓ Grammar</button>
+                        <button class="ai-quick-action" onclick="quickAIAction('expand')">➕ Expand</button>
+                        <button class="ai-quick-action" onclick="quickAIAction('shorten')">✂️ Shorten</button>
+                    </div>
+
+                    <div class="ai-divider"></div>
+
+                    <div class="ai-context-options">
+                        <span class="ai-context-label">Context Options</span>
+                        <label class="ai-context-checkbox">
+                            <input type="checkbox" id="includeCurrentChapter" checked>
+                            <span>Include current chapter</span>
+                        </label>
+                        <label class="ai-context-checkbox">
+                            <input type="checkbox" id="includeAllChapters">
+                            <span>Include all chapters context</span>
+                        </label>
+                    </div>
+
+                    <div class="ai-quick-prompts-section">
+                        <span class="ai-quick-prompts-label">Quick Prompts</span>
+                        <button class="ai-quick-prompt-btn" onclick="setQuickPrompt('Help me develop this scene with more sensory details')">Add sensory details</button>
+                        <button class="ai-quick-prompt-btn" onclick="setQuickPrompt('Suggest ways to make this dialogue more natural and engaging')">Improve dialogue</button>
+                        <button class="ai-quick-prompt-btn" onclick="setQuickPrompt('Help me show instead of tell in this passage')">Show, don't tell</button>
+                        <button class="ai-quick-prompt-btn" onclick="setQuickPrompt('Suggest what could happen next in the story')">What happens next?</button>
+                        <button class="ai-quick-prompt-btn" onclick="setQuickPrompt('Help me strengthen the character development in this section')">Character development</button>
+                    </div>
+
+                    <div class="ai-divider"></div>
+
+                    <div class="ai-custom-prompt-section">
+                        <label class="ai-custom-prompt-label">Custom Request</label>
+                        <textarea 
+                            class="ai-bubble-prompt-input" 
+                            id="aiBubblePrompt" 
+                            placeholder="Ask the AI anything about your writing..."
+                        ></textarea>
+                        <button class="ai-bubble-submit" id="aiBubbleSubmit" onclick="submitAIRequest()">
+                            Get Suggestions
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Character Library Slide Panel -->
+    <div class="character-panel" id="characterPanel">
+        <div class="character-panel-header">
+            <div class="character-panel-header-top">
+                <h2>Character Library</h2>
+                <button class="character-panel-close" onclick="closeCharacterPanel()">×</button>
+            </div>
+            <p class="character-panel-subtitle">Track your characters & connections</p>
+        </div>
+        <div class="character-panel-body">
+            <button class="add-character-btn" onclick="openCharacterModal()">+ Add Character</button>
+            
+            <div class="linked-resources-panel" id="linkedResourcesPanel" style="display: none;">
+                <div class="linked-resources-title">📚 Characters from Linked Projects</div>
+                <div id="linkedCharactersContainer"></div>
+            </div>
+            
+            <ul class="character-list" id="characterList"></ul>
+        </div>
+    </div>
+
+    <div class="save-indicator" id="saveIndicator">Saved ✓</div>
+
+    <!-- AI Image Generation Modal -->
+    <div class="ai-image-modal" id="aiImageModal">
+        <div class="ai-image-modal-content">
+            <h3>AI Visual Generator</h3>
+            <p class="ai-image-modal-subtitle">Create character portraits, setting illustrations, and scene visuals</p>
+            
+            <div class="image-type-selector">
+                <div class="image-type-option selected" onclick="selectImageType('character')" data-type="character">
+                    <div class="image-type-icon">👤</div>
+                    <div class="image-type-label">Character Portrait</div>
+                </div>
+                <div class="image-type-option" onclick="selectImageType('setting')" data-type="setting">
+                    <div class="image-type-icon">🏰</div>
+                    <div class="image-type-label">Setting/Location</div>
+                </div>
+            </div>
+
+            <div class="image-prompt-section">
+                <label class="image-prompt-label">Describe what you want to visualize</label>
+                <textarea 
+                    class="image-prompt-input" 
+                    id="imagePromptInput" 
+                    placeholder="E.g., A mysterious woman in her mid-30s with silver hair, wearing a Victorian-era dress, standing in a moonlit garden..."
+                ></textarea>
+            </div>
+
+            <div class="image-style-selector">
+                <label class="image-style-label">Art Style</label>
+                <div class="image-styles">
+                    <button class="image-style-chip selected" onclick="selectImageStyle('realistic')" data-style="realistic">Realistic</button>
+                    <button class="image-style-chip" onclick="selectImageStyle('painterly')" data-style="painterly">Painterly</button>
+                    <button class="image-style-chip" onclick="selectImageStyle('illustration')" data-style="illustration">Illustration</button>
+                    <button class="image-style-chip" onclick="selectImageStyle('sketch')" data-style="sketch">Sketch</button>
+                    <button class="image-style-chip" onclick="selectImageStyle('cinematic')" data-style="cinematic">Cinematic</button>
+                    <button class="image-style-chip" onclick="selectImageStyle('fantasy')" data-style="fantasy">Fantasy Art</button>
+                </div>
+            </div>
+
+            <button class="generate-image-btn" id="generateImageBtn" onclick="generateAIImage()">
+                ✨ Generate Visual
+            </button>
+
+            <div class="generated-image-container" id="generatedImageContainer">
+                <img class="generated-image" id="generatedImage" alt="Generated artwork">
+                <div class="image-actions">
+                    <button class="image-action-btn" onclick="downloadGeneratedImage()">💾 Download</button>
+                    <button class="image-action-btn" onclick="regenerateImage()">🔄 Regenerate</button>
+                </div>
+            </div>
+
+            <button class="close-image-modal-btn" onclick="closeAIImageModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Writing Goals Widget -->
+    <div class="writing-goals-modal" id="writingGoalsModal">
+        <div class="writing-goals-modal-content">
+            <h3>Writing Goals</h3>
+            <p class="writing-goals-modal-subtitle">Track your progress and set daily targets</p>
+            
+            <div class="goal-section">
+                <div class="goal-section-title">Today's Progress</div>
+                
+                <div class="goal-stat-card">
+                    <div class="goal-stat-header">
+                        <span class="goal-stat-label">Daily Word Count</span>
+                        <span class="goal-stat-value" id="todayWordsValue">0</span>
+                    </div>
+                    <div class="goal-progress-bar">
+                        <div class="goal-progress-fill" id="dailyWordsProgressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="goal-progress-text" id="dailyWordsProgressText">0 / 1000 words (0%)</div>
+                </div>
+
+                <div class="goal-stat-card">
+                    <div class="goal-stat-header">
+                        <span class="goal-stat-label">Writing Session</span>
+                        <span class="goal-stat-value" id="sessionTimeValue">0m</span>
+                    </div>
+                    <div class="goal-progress-bar">
+                        <div class="goal-progress-fill" id="sessionTimeProgressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="goal-progress-text" id="sessionTimeProgressText">0 / 60 minutes (0%)</div>
+                </div>
+            </div>
+
+            <div class="goal-section">
+                <div class="goal-section-title">Set Your Targets</div>
+                
+                <div class="goal-input-group">
+                    <label class="goal-input-label">Daily Word Count Goal</label>
+                    <input type="number" class="goal-input" id="wordGoalInput" value="1000" min="100" step="100">
+                </div>
+
+                <div class="goal-input-group">
+                    <label class="goal-input-label">Session Time Goal (minutes)</label>
+                    <input type="number" class="goal-input" id="timeGoalInput" value="60" min="5" step="5">
+                </div>
+            </div>
+
+            <button class="save-goals-btn" onclick="saveWritingGoals()">💾 Save Goals</button>
+            <button class="close-goals-modal-btn" onclick="closeWritingGoalsModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Project Management Modal -->
+    <div class="project-modal" id="projectModal">
+        <div class="project-modal-content">
+            <h3>Manage Projects</h3>
+            <p class="project-modal-subtitle">Switch between books or create a new project</p>
+            
+            <div class="create-project-section">
+                <div class="create-project-title">Create New Project</div>
+                <div class="project-input-group">
+                    <label class="project-input-label">Project Name</label>
+                    <input type="text" class="project-input" id="newProjectName" placeholder="Enter your book title...">
+                </div>
+                <div class="project-input-group">
+                    <label class="project-input-label">Description (optional)</label>
+                    <input type="text" class="project-input" id="newProjectDescription" placeholder="A brief description of your project...">
+                </div>
+                <button class="create-project-btn" onclick="createNewProject()">+ Create Project</button>
+            </div>
+
+            <div class="series-info-section" id="seriesInfoSection" style="display: none;">
+                <div class="series-info-title">📚 Series / Linked Projects</div>
+                <div id="seriesLinksList"></div>
+                
+                <div class="add-series-link-section">
+                    <div class="add-series-link-title">Link Another Project (Access shared characters)</div>
+                    <select class="series-link-select" id="seriesLinkSelect">
+                        <option value="">Select a project to link...</option>
+                    </select>
+                    <button class="add-series-link-btn" onclick="addSeriesLink()">+ Link Project</button>
+                </div>
+            </div>
+
+            <div style="margin: 2rem 0; text-align: center; color: var(--sepia); font-size: 0.875rem;">
+                — OR —
+            </div>
+
+            <div>
+                <div class="create-project-title">Your Projects</div>
+                <ul class="project-list" id="projectList"></ul>
+            </div>
+
+            <button class="close-project-modal-btn" onclick="closeProjectModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Character Modal -->
+    <div class="character-modal" id="characterModal">
+        <div class="character-modal-content">
+            <h3 id="characterModalTitle">Add Character</h3>
+            <form onsubmit="saveCharacter(event)">
+                <div class="character-form-group">
+                    <label class="character-form-label">Character Name *</label>
+                    <input type="text" class="character-form-input" id="characterName" required>
+                </div>
+                <div class="character-form-group">
+                    <label class="character-form-label">Role (e.g., Protagonist, Antagonist, Supporting)</label>
+                    <input type="text" class="character-form-input" id="characterRole">
+                </div>
+                <div class="character-form-group">
+                    <label class="character-form-label">Description</label>
+                    <textarea class="character-form-input character-form-textarea" id="characterDescription"></textarea>
+                </div>
+                <div class="character-form-group">
+                    <label class="character-form-label">Connected Characters (comma-separated names)</label>
+                    <input type="text" class="character-form-input" id="characterConnections" placeholder="e.g., Sarah, Tom, Alex">
+                </div>
+                <div class="character-form-buttons">
+                    <button type="button" class="character-form-btn secondary" onclick="closeCharacterModal()">Cancel</button>
+                    <button type="submit" class="character-form-btn primary">Save Character</button>
+                </div>
+                <button type="button" class="delete-character-btn" id="deleteCharacterBtn" onclick="deleteCurrentCharacter()" style="display: none;">Delete Character</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Grammar Modal -->
+    <div class="grammar-modal" id="grammarModal">
+        <div class="grammar-modal-content">
+            <h3>Grammar & Style Suggestions</h3>
+            <div id="grammarResults"></div>
+            <button class="grammar-close-btn" onclick="closeGrammarModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Version History Modal -->
+    <div class="version-modal" id="versionModal">
+        <div class="version-modal-content">
+            <h3>Version History</h3>
+            <p class="version-modal-subtitle">View and restore previous versions of this chapter</p>
+            
+            <div class="version-content-wrapper">
+                <div class="version-list-container">
+                    <ul class="version-list" id="versionList"></ul>
+                </div>
+                
+                <div class="version-preview-container" id="versionPreview">
+                    <div class="version-empty">
+                        <div class="version-empty-icon">🕐</div>
+                        <p>Select a version to preview</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="version-actions">
+                <button class="version-btn close" onclick="closeVersionHistory()">Close</button>
+                <button class="version-btn delete" id="deleteVersionBtn" onclick="deleteSelectedVersion()" disabled>Delete Version</button>
+                <button class="version-btn restore" id="restoreVersionBtn" onclick="restoreSelectedVersion()" disabled>Restore This Version</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chapters = [];
+        let currentChapterId = null;
+        let saveTimeout = null;
+        let characters = [];
+        let currentCharacterId = null;
+        let selectedVersionId = null;
+        let versionSaveTimeout = null;
+        let projects = [];
+        let currentProjectId = null;
+
+        // Color picker variables
+        const textColors = ['#000000', '#E91E63', '#9C27B0', '#3F51B5', '#2196F3', '#00BCD4', 
+                            '#009688', '#4CAF50', '#FF9800', '#FF5722', '#795548', '#607D8B'];
+        const highlightColors = ['transparent', '#FFEB3B', '#FFE082', '#81C784', '#64B5F6', 
+                                '#BA68C8', '#FF8A65', '#FFB74D', '#A5D6A7', '#90CAF9'];
+        let currentTextColor = '#000000';
+        let currentHighlightColor = '#FFEB3B';
+
+        // Comments and collaboration variables
+        let comments = [];
+        let currentCommentText = '';
+        let collaborators = [];
+
+        // Constants for version history
+        const VERSION_SAVE_INTERVAL = 5000; // Save version every 5 seconds of inactivity
+        const MAX_VERSIONS_PER_CHAPTER = 50; // Keep last 50 versions
+
+        // Initialize app
+        async function initApp() {
+            try {
+                await loadProjects();
+                if (projects.length === 0) {
+                    await createDefaultProject();
+                } else {
+                    await switchToProject(projects[0].id);
+                }
+                initColorPickers();
+                await loadCollaborators();
+            } catch (error) {
+                console.error('Error in initApp:', error);
+                // Try to create a default project anyway
+                try {
+                    await createDefaultProject();
+                    initColorPickers();
+                } catch (e) {
+                    console.error('Failed to create default project:', e);
+                }
+            }
+        }
+
+        // ========== COLOR PICKER FUNCTIONS ==========
+        
+        function initColorPickers() {
+            const textPalette = document.getElementById('textColorPalette');
+            const highlightPalette = document.getElementById('highlightPalette');
+            
+            if (!textPalette || !highlightPalette) return;
+            
+            textColors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.background = color;
+                swatch.onclick = () => applyTextColor(color);
+                textPalette.appendChild(swatch);
+            });
+            
+            highlightColors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.background = color === 'transparent' ? '#ffffff' : color;
+                if (color === 'transparent') swatch.style.border = '2px dashed #ccc';
+                swatch.onclick = () => applyHighlight(color);
+                highlightPalette.appendChild(swatch);
+            });
+        }
+
+        function toggleColorPicker(type) {
+            const dropdown = document.getElementById(type === 'text' ? 'textColorDropdown' : 'highlightDropdown');
+            const otherDropdown = document.getElementById(type === 'text' ? 'highlightDropdown' : 'textColorDropdown');
+            
+            if (otherDropdown) otherDropdown.classList.remove('show');
+            if (dropdown) dropdown.classList.toggle('show');
+        }
+
+        function applyTextColor(color) {
+            document.execCommand('foreColor', false, color);
+            currentTextColor = color;
+            const preview = document.getElementById('textColorPreview');
+            const dropdown = document.getElementById('textColorDropdown');
+            if (preview) preview.style.background = color;
+            if (dropdown) dropdown.classList.remove('show');
+            saveCurrentChapter();
+        }
+
+        function applyHighlight(color) {
+            if (color === 'transparent') {
+                document.execCommand('removeFormat', false, null);
+            } else {
+                document.execCommand('backColor', false, color);
+            }
+            currentHighlightColor = color;
+            const preview = document.getElementById('highlightPreview');
+            const dropdown = document.getElementById('highlightDropdown');
+            if (preview) preview.style.background = color === 'transparent' ? '#ffffff' : color;
+            if (dropdown) dropdown.classList.remove('show');
+            saveCurrentChapter();
+        }
+
+        // ========== PROJECT MANAGEMENT ==========
+
+        async function loadProjects() {
+            try {
+                const keys = await window.storage.list('project:');
+                if (keys && keys.keys) {
+                    for (const key of keys.keys) {
+                        const result = await window.storage.get(key);
+                        if (result) {
+                            projects.push(JSON.parse(result.value));
+                        }
+                    }
+                    projects.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+                }
+            } catch (error) {
+                console.log('No existing projects found');
+            }
+        }
+
+        async function createDefaultProject() {
+            const defaultProject = {
+                id: Date.now().toString(),
+                name: 'My First Novel',
+                description: '',
+                seriesLinks: [], // Array of linked project IDs
+                createdAt: new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            };
+            projects.push(defaultProject);
+            await saveProject(defaultProject);
+            await switchToProject(defaultProject.id);
+        }
+
+        async function saveProject(project) {
+            try {
+                await window.storage.set(`project:${project.id}`, JSON.stringify(project));
+            } catch (error) {
+                console.error('Failed to save project:', error);
+            }
+        }
+
+        async function switchToProject(projectId) {
+            currentProjectId = projectId;
+            const project = projects.find(p => p.id === projectId);
+            
+            if (project) {
+                document.getElementById('currentProjectName').textContent = project.name;
+                
+                // Clear current data
+                chapters = [];
+                characters = [];
+                currentChapterId = null;
+                
+                // Load project-specific data
+                await loadChapters();
+                await loadCharacters();
+                
+                if (chapters.length === 0) {
+                    addChapter();
+                } else {
+                    selectChapter(chapters[0].id);
+                }
+                
+                updateCharacterMetrics();
+                renderProjectList();
+            }
+        }
+
+        function openProjectModal() {
+            document.getElementById('projectModal').classList.add('show');
+            renderProjectList();
+            updateSeriesSection();
+        }
+
+        function closeProjectModal() {
+            document.getElementById('projectModal').classList.remove('show');
+        }
+
+        function updateSeriesSection() {
+            const currentProject = projects.find(p => p.id === currentProjectId);
+            const seriesSection = document.getElementById('seriesInfoSection');
+            const seriesLinksList = document.getElementById('seriesLinksList');
+            const seriesLinkSelect = document.getElementById('seriesLinkSelect');
+            
+            if (!currentProject) return;
+            
+            // Show section if current project exists
+            seriesSection.style.display = 'block';
+            
+            // Render linked projects
+            if (currentProject.seriesLinks && currentProject.seriesLinks.length > 0) {
+                seriesLinksList.innerHTML = currentProject.seriesLinks.map(linkedId => {
+                    const linkedProject = projects.find(p => p.id === linkedId);
+                    if (!linkedProject) return '';
+                    
+                    return `
+                        <div class="series-project-link">
+                            <div>
+                                <span class="series-project-name">${linkedProject.name}</span>
+                            </div>
+                            <button class="remove-series-link-btn" onclick="removeSeriesLink('${linkedId}')">Remove</button>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                seriesLinksList.innerHTML = '<p style="font-size: 0.85rem; color: var(--sepia); text-align: center; padding: 1rem;">No linked projects yet. Link other books in your series to share characters!</p>';
+            }
+            
+            // Populate select dropdown with available projects
+            const availableProjects = projects.filter(p => 
+                p.id !== currentProjectId && 
+                (!currentProject.seriesLinks || !currentProject.seriesLinks.includes(p.id))
+            );
+            
+            seriesLinkSelect.innerHTML = '<option value="">Select a project to link...</option>' + 
+                availableProjects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        }
+
+        async function addSeriesLink() {
+            const selectEl = document.getElementById('seriesLinkSelect');
+            const linkedProjectId = selectEl.value;
+            
+            if (!linkedProjectId) {
+                alert('Please select a project to link');
+                return;
+            }
+            
+            const currentProject = projects.find(p => p.id === currentProjectId);
+            if (!currentProject) return;
+            
+            // Initialize seriesLinks if needed
+            if (!currentProject.seriesLinks) {
+                currentProject.seriesLinks = [];
+            }
+            
+            // Add link if not already present
+            if (!currentProject.seriesLinks.includes(linkedProjectId)) {
+                currentProject.seriesLinks.push(linkedProjectId);
+                currentProject.lastModified = new Date().toISOString();
+                await saveProject(currentProject);
+                
+                // Also add reciprocal link
+                const linkedProject = projects.find(p => p.id === linkedProjectId);
+                if (linkedProject) {
+                    if (!linkedProject.seriesLinks) {
+                        linkedProject.seriesLinks = [];
+                    }
+                    if (!linkedProject.seriesLinks.includes(currentProjectId)) {
+                        linkedProject.seriesLinks.push(currentProjectId);
+                        linkedProject.lastModified = new Date().toISOString();
+                        await saveProject(linkedProject);
+                    }
+                }
+                
+                updateSeriesSection();
+                updateLinkedCharacters();
+                
+                // Show success message
+                alert('Projects linked! You can now access characters from both projects.');
+            }
+        }
+
+        async function removeSeriesLink(linkedProjectId) {
+            if (!confirm('Remove this series link? You will no longer see characters from this project.')) {
+                return;
+            }
+            
+            const currentProject = projects.find(p => p.id === currentProjectId);
+            if (!currentProject) return;
+            
+            // Remove from current project
+            currentProject.seriesLinks = currentProject.seriesLinks.filter(id => id !== linkedProjectId);
+            currentProject.lastModified = new Date().toISOString();
+            await saveProject(currentProject);
+            
+            // Remove reciprocal link
+            const linkedProject = projects.find(p => p.id === linkedProjectId);
+            if (linkedProject && linkedProject.seriesLinks) {
+                linkedProject.seriesLinks = linkedProject.seriesLinks.filter(id => id !== currentProjectId);
+                linkedProject.lastModified = new Date().toISOString();
+                await saveProject(linkedProject);
+            }
+            
+            updateSeriesSection();
+            updateLinkedCharacters();
+        }
+
+        function renderProjectList() {
+            const list = document.getElementById('projectList');
+            
+            if (projects.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--sepia); padding: 2rem;">No projects yet. Create your first one above!</p>';
+                return;
+            }
+            
+            list.innerHTML = projects.map(project => {
+                const wordCount = project.id === currentProjectId ? chapters.reduce((sum, ch) => sum + ch.wordCount, 0) : 0;
+                const chapterCount = project.id === currentProjectId ? chapters.length : 0;
+                const isActive = project.id === currentProjectId;
+                const hasSeriesLinks = project.seriesLinks && project.seriesLinks.length > 0;
+                
+                return `
+                    <li class="project-item ${isActive ? 'active' : ''}" onclick="switchToProject('${project.id}')">
+                        <div class="project-item-name">
+                            ${project.name}
+                            ${hasSeriesLinks ? `<span class="series-badge">📚 Series (${project.seriesLinks.length})</span>` : ''}
+                        </div>
+                        <div class="project-item-meta">
+                            <span>${chapterCount} chapters</span>
+                            <span>${wordCount.toLocaleString()} words</span>
+                            <span>${new Date(project.lastModified).toLocaleDateString()}</span>
+                        </div>
+                        ${project.description ? `<div style="font-size: 0.85rem; color: var(--sepia); margin-top: 0.5rem;">${project.description}</div>` : ''}
+                        <div class="project-item-actions">
+                            ${!isActive ? `<button class="project-action-btn" onclick="event.stopPropagation(); switchToProject('${project.id}'); closeProjectModal();">Open</button>` : '<span style="font-size: 0.75rem; color: var(--primary); font-weight: 600;">● Active</span>'}
+                            ${projects.length > 1 ? `<button class="project-action-btn delete" onclick="event.stopPropagation(); deleteProject('${project.id}')">Delete</button>` : ''}
+                        </div>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        async function createNewProject() {
+            const name = document.getElementById('newProjectName').value.trim();
+            const description = document.getElementById('newProjectDescription').value.trim();
+            
+            if (!name) {
+                alert('Please enter a project name');
+                return;
+            }
+            
+            const newProject = {
+                id: Date.now().toString(),
+                name,
+                description,
+                seriesLinks: [],
+                createdAt: new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            };
+            
+            projects.push(newProject);
+            await saveProject(newProject);
+            
+            // Clear inputs
+            document.getElementById('newProjectName').value = '';
+            document.getElementById('newProjectDescription').value = '';
+            
+            // Switch to new project
+            await switchToProject(newProject.id);
+            closeProjectModal();
+        }
+
+        async function deleteProject(projectId) {
+            if (!confirm('Are you sure you want to delete this project? All chapters and characters will be permanently deleted.')) {
+                return;
+            }
+            
+            try {
+                // Delete project
+                await window.storage.delete(`project:${projectId}`);
+                
+                // Delete all chapters for this project
+                const chapterKeys = await window.storage.list(`project:${projectId}:chapter:`);
+                if (chapterKeys && chapterKeys.keys) {
+                    for (const key of chapterKeys.keys) {
+                        await window.storage.delete(key);
+                    }
+                }
+                
+                // Delete all characters for this project
+                const characterKeys = await window.storage.list(`project:${projectId}:character:`);
+                if (characterKeys && characterKeys.keys) {
+                    for (const key of characterKeys.keys) {
+                        await window.storage.delete(key);
+                    }
+                }
+                
+                // Remove from array
+                projects = projects.filter(p => p.id !== projectId);
+                
+                // If deleted current project, switch to another
+                if (projectId === currentProjectId) {
+                    if (projects.length > 0) {
+                        await switchToProject(projects[0].id);
+                    } else {
+                        await createDefaultProject();
+                    }
+                }
+                
+                renderProjectList();
+            } catch (error) {
+                console.error('Failed to delete project:', error);
+            }
+        }
+
+        // Load chapters from storage
+        async function loadChapters() {
+            chapters = [];
+            try {
+                const keys = await window.storage.list(`project:${currentProjectId}:chapter:`);
+                if (keys && keys.keys) {
+                    for (const key of keys.keys) {
+                        const result = await window.storage.get(key);
+                        if (result) {
+                            chapters.push(JSON.parse(result.value));
+                        }
+                    }
+                    chapters.sort((a, b) => a.order - b.order);
+                }
+            } catch (error) {
+                console.log('No existing chapters found, starting fresh');
+            }
+            renderChapterList();
+        }
+
+        // Save chapter to storage
+        async function saveChapter(chapter) {
+            try {
+                await window.storage.set(`project:${currentProjectId}:chapter:${chapter.id}`, JSON.stringify(chapter));
+                
+                // Update project's last modified time
+                const project = projects.find(p => p.id === currentProjectId);
+                if (project) {
+                    project.lastModified = new Date().toISOString();
+                    await saveProject(project);
+                }
+                
+                showSaveIndicator();
+            } catch (error) {
+                console.error('Failed to save chapter:', error);
+            }
+        }
+
+        // Add new chapter
+        async function addChapter() {
+            const newChapter = {
+                id: Date.now().toString(),
+                title: `Chapter ${chapters.length + 1}`,
+                content: '',
+                order: chapters.length,
+                wordCount: 0,
+                createdAt: new Date().toISOString()
+            };
+            chapters.push(newChapter);
+            await saveChapter(newChapter);
+            renderChapterList();
+            selectChapter(newChapter.id);
+            updateCharacterMetrics();
+        }
+
+        // Delete chapter
+        async function deleteChapter(id) {
+            if (!confirm('Are you sure you want to delete this chapter?')) return;
+            
+            try {
+                await window.storage.delete(`project:${currentProjectId}:chapter:${id}`);
+                chapters = chapters.filter(ch => ch.id !== id);
+                
+                // Reorder remaining chapters
+                chapters.forEach((ch, index) => {
+                    ch.order = index;
+                    ch.title = ch.title.replace(/Chapter \d+/, `Chapter ${index + 1}`);
+                });
+                
+                // Save reordered chapters
+                for (const ch of chapters) {
+                    await saveChapter(ch);
+                }
+                
+                renderChapterList();
+                if (chapters.length > 0) {
+                    selectChapter(chapters[0].id);
+                } else {
+                    addChapter();
+                }
+                updateCharacterMetrics();
+            } catch (error) {
+                console.error('Failed to delete chapter:', error);
+            }
+        }
+
+        // Render chapter list
+        function renderChapterList() {
+            const list = document.getElementById('chapterList');
+            list.innerHTML = chapters.map(ch => `
+                <li class="chapter-item ${ch.id === currentChapterId ? 'active' : ''}" onclick="selectChapter('${ch.id}')">
+                    <div class="chapter-number">Chapter ${ch.order + 1}</div>
+                    <div class="chapter-title">${ch.title}</div>
+                    <div class="chapter-word-count">${ch.wordCount} words</div>
+                    <button class="delete-chapter-btn" onclick="event.stopPropagation(); deleteChapter('${ch.id}')">Delete</button>
+                </li>
+            `).join('');
+        }
+
+        // Select and display chapter
+        async function selectChapter(id) {
+            saveCurrentChapter(); // Save before switching
+            
+            currentChapterId = id;
+            const chapter = chapters.find(ch => ch.id === id);
+            if (chapter) {
+                document.getElementById('chapterTitle').value = chapter.title;
+                document.getElementById('editorContent').innerHTML = chapter.content || '';
+                updateStats();
+                renderChapterList();
+                await loadComments();
+            }
+        }
+
+        // Save current chapter
+        function saveCurrentChapter() {
+            if (!currentChapterId) return;
+
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                const chapter = chapters.find(ch => ch.id === currentChapterId);
+                if (chapter) {
+                    const editor = document.getElementById('editorContent');
+                    const newContent = editor.innerHTML || '';
+                    const newTitle = document.getElementById('chapterTitle').value;
+                    
+                    // Check if content has actually changed
+                    if (chapter.content !== newContent || chapter.title !== newTitle) {
+                        chapter.title = newTitle;
+                        chapter.content = newContent;
+                        const textContent = editor.innerText || editor.textContent || '';
+                        chapter.wordCount = countWords(textContent);
+                        chapter.lastModified = new Date().toISOString();
+                        await saveChapter(chapter);
+                        renderChapterList();
+                        
+                        // Save version after a delay
+                        saveVersionDelayed();
+                    }
+                }
+            }, 1000);
+        }
+
+        // Save version with delay to avoid too many versions
+        function saveVersionDelayed() {
+            clearTimeout(versionSaveTimeout);
+            versionSaveTimeout = setTimeout(() => {
+                saveVersion();
+            }, VERSION_SAVE_INTERVAL);
+        }
+
+        // Save a version of the current chapter
+        async function saveVersion() {
+            if (!currentChapterId) return;
+            
+            const chapter = chapters.find(ch => ch.id === currentChapterId);
+            if (!chapter || !chapter.content.trim()) return;
+            
+            const version = {
+                id: Date.now().toString(),
+                chapterId: currentChapterId,
+                title: chapter.title,
+                content: chapter.content,
+                wordCount: chapter.wordCount,
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                // Get existing versions for this chapter
+                const versionKey = `project:${currentProjectId}:versions:${currentChapterId}`;
+                let versions = [];
+                
+                try {
+                    const result = await window.storage.get(versionKey);
+                    if (result) {
+                        versions = JSON.parse(result.value);
+                    }
+                } catch (error) {
+                    // No versions exist yet
+                }
+                
+                // Check if content is different from last version
+                if (versions.length > 0) {
+                    const lastVersion = versions[0];
+                    if (lastVersion.content === version.content) {
+                        return; // Don't save duplicate versions
+                    }
+                }
+                
+                // Add new version at the beginning
+                versions.unshift(version);
+                
+                // Keep only the latest MAX_VERSIONS_PER_CHAPTER versions
+                if (versions.length > MAX_VERSIONS_PER_CHAPTER) {
+                    versions = versions.slice(0, MAX_VERSIONS_PER_CHAPTER);
+                }
+                
+                // Save versions
+                await window.storage.set(versionKey, JSON.stringify(versions));
+                
+            } catch (error) {
+                console.error('Failed to save version:', error);
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            const editor = document.getElementById('editorContent');
+            const content = editor.innerText || editor.textContent || '';
+            const words = countWords(content);
+            const chars = content.length;
+
+            document.getElementById('wordCount').textContent = `${words} words`;
+            document.getElementById('charCount').textContent = `${chars} characters`;
+        }
+
+        // Count words
+        function countWords(text) {
+            return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+        }
+
+        // Show save indicator
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => indicator.classList.remove('show'), 2000);
+        }
+
+        // Format text (contenteditable implementation)
+        function formatText(command) {
+            document.execCommand(command, false, null);
+            saveCurrentChapter();
+        }
+
+        // Handle special keyboard shortcuts in editor
+        function handleEditorKeydown(event) {
+            const editor = event.target;
+            
+            // Tab key for indentation
+            if (event.key === 'Tab') {
+                event.preventDefault();
+                
+                const selection = window.getSelection();
+                const range = selection.getRangeAt(0);
+                
+                if (event.shiftKey) {
+                    // Shift+Tab: Remove indentation
+                    // For now, just prevent default
+                    return false;
+                } else {
+                    // Tab: Add indentation (4 spaces)
+                    const indent = '\u00A0\u00A0\u00A0\u00A0'; // 4 non-breaking spaces
+                    const textNode = document.createTextNode(indent);
+                    range.insertNode(textNode);
+                    
+                    // Move cursor after the indent
+                    range.setStartAfter(textNode);
+                    range.setEndAfter(textNode);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+                
+                saveCurrentChapter();
+                updateStats();
+                return false;
+            }
+            
+            // Enter key - preserve indentation
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                
+                const selection = window.getSelection();
+                const range = selection.getRangeAt(0);
+                
+                // Insert line break
+                const br = document.createElement('br');
+                range.insertNode(br);
+                
+                // Move cursor after the br
+                range.setStartAfter(br);
+                range.setEndAfter(br);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                
+                saveCurrentChapter();
+                updateStats();
+                return false;
+            }
+        }
+
+        // Set quick prompt
+        function setQuickPrompt(prompt) {
+            document.getElementById('promptInput').value = prompt;
+        }
+
+        // Get AI suggestions
+        async function getSuggestions() {
+            const promptInput = document.getElementById('promptInput');
+            const prompt = promptInput.value.trim();
+            
+            if (!prompt) {
+                alert('Please enter a prompt for Claude');
+                return;
+            }
+
+            const btn = document.getElementById('getSuggestionsBtn');
+            const responseContainer = document.getElementById('aiResponseContainer');
+            
+            btn.disabled = true;
+            btn.textContent = 'Thinking...';
+            responseContainer.innerHTML = '<div class="loading">Claude is analyzing your writing...</div>';
+
+            try {
+                const includeCurrentChapter = document.getElementById('includeCurrentChapter').checked;
+                const includeAllChapters = document.getElementById('includeAllChapters').checked;
+                
+                let context = '';
+                if (includeCurrentChapter && currentChapterId) {
+                    const chapter = chapters.find(ch => ch.id === currentChapterId);
+                    if (chapter) {
+                        context += `\n\nCurrent chapter (${chapter.title}):\n${chapter.content}`;
+                    }
+                }
+                
+                if (includeAllChapters) {
+                    context += '\n\nAll chapters:\n';
+                    chapters.forEach(ch => {
+                        context += `\n--- ${ch.title} ---\n${ch.content}\n`;
+                    });
+                }
+
+                const fullPrompt = `You are a professional writing assistant helping an author with their book. ${prompt}${context}`;
+
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [
+                            { role: 'user', content: fullPrompt }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                const suggestion = data.content.find(item => item.type === 'text')?.text || 'No suggestion available';
+
+                responseContainer.innerHTML = `
+                    <div class="ai-response">
+                        <h3>Claude's Suggestion</h3>
+                        <div class="ai-response-content">${suggestion}</div>
+                    </div>
+                `;
+            } catch (error) {
+                responseContainer.innerHTML = `
+                    <div class="ai-response">
+                        <h3>Error</h3>
+                        <div class="ai-response-content">Failed to get suggestions. Please try again.</div>
+                    </div>
+                `;
+                console.error('AI suggestion error:', error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Get AI Suggestions';
+            }
+        }
+
+        // Export manuscript
+        async function exportManuscript() {
+            let manuscript = '# Full Manuscript\n\n';
+            
+            for (const chapter of chapters) {
+                manuscript += `## ${chapter.title}\n\n`;
+                manuscript += `${chapter.content}\n\n`;
+                manuscript += `---\n\n`;
+            }
+            
+            const blob = new Blob([manuscript], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'manuscript.md';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', async function() {
+            // Check if storage API is available
+            if (typeof window.storage === 'undefined') {
+                console.error('Storage API not available. Using fallback localStorage.');
+                // Create fallback storage using localStorage
+                window.storage = {
+                    async get(key) {
+                        try {
+                            const value = localStorage.getItem(key);
+                            return value ? { key, value, shared: false } : null;
+                        } catch (e) {
+                            console.error('Storage get error:', e);
+                            return null;
+                        }
+                    },
+                    async set(key, value) {
+                        try {
+                            localStorage.setItem(key, value);
+                            return { key, value, shared: false };
+                        } catch (e) {
+                            console.error('Storage set error:', e);
+                            return null;
+                        }
+                    },
+                    async delete(key) {
+                        try {
+                            localStorage.removeItem(key);
+                            return { key, deleted: true, shared: false };
+                        } catch (e) {
+                            console.error('Storage delete error:', e);
+                            return null;
+                        }
+                    },
+                    async list(prefix) {
+                        try {
+                            const keys = [];
+                            for (let i = 0; i < localStorage.length; i++) {
+                                const key = localStorage.key(i);
+                                if (!prefix || key.startsWith(prefix)) {
+                                    keys.push(key);
+                                }
+                            }
+                            return { keys, prefix, shared: false };
+                        } catch (e) {
+                            console.error('Storage list error:', e);
+                            return { keys: [] };
+                        }
+                    }
+                };
+            }
+            
+            try {
+                await initApp();
+            } catch (error) {
+                console.error('Failed to initialize app:', error);
+                alert('Failed to initialize the app. Please check the console for details.');
+            }
+        });
+
+        // ========== SIDEBAR TOGGLE ==========
+
+        function toggleSidebar() {
+            try {
+                const container = document.getElementById('appContainer');
+                const icon = document.getElementById('sidebarToggleIcon');
+                
+                if (!container) {
+                    console.error('App container not found');
+                    return;
+                }
+                
+                if (container.classList.contains('sidebar-collapsed')) {
+                    container.classList.remove('sidebar-collapsed');
+                    if (icon) icon.textContent = '☰';
+                } else {
+                    container.classList.add('sidebar-collapsed');
+                    if (icon) icon.textContent = '☰';
+                }
+            } catch (error) {
+                console.error('Error in toggleSidebar:', error);
+            }
+        }
+
+        // ========== CHARACTER LIBRARY ==========
+
+        // Load characters from storage
+        async function loadCharacters() {
+            characters = [];
+            try {
+                const keys = await window.storage.list(`project:${currentProjectId}:character:`);
+                if (keys && keys.keys) {
+                    for (const key of keys.keys) {
+                        const result = await window.storage.get(key);
+                        if (result) {
+                            characters.push(JSON.parse(result.value));
+                        }
+                    }
+                    characters.sort((a, b) => a.name.localeCompare(b.name));
+                }
+            } catch (error) {
+                console.log('No existing characters found');
+            }
+            renderCharacterList();
+        }
+
+        // Save character to storage
+        async function saveCharacterToStorage(character) {
+            try {
+                await window.storage.set(`project:${currentProjectId}:character:${character.id}`, JSON.stringify(character));
+            } catch (error) {
+                console.error('Failed to save character:', error);
+            }
+        }
+
+        // Open character modal
+        function openCharacterModal(characterId = null) {
+            const modal = document.getElementById('characterModal');
+            const title = document.getElementById('characterModalTitle');
+            const deleteBtn = document.getElementById('deleteCharacterBtn');
+            
+            if (characterId) {
+                const character = characters.find(c => c.id === characterId);
+                if (character) {
+                    title.textContent = 'Edit Character';
+                    document.getElementById('characterName').value = character.name;
+                    document.getElementById('characterRole').value = character.role || '';
+                    document.getElementById('characterDescription').value = character.description || '';
+                    document.getElementById('characterConnections').value = character.connections?.join(', ') || '';
+                    currentCharacterId = characterId;
+                    deleteBtn.style.display = 'block';
+                }
+            } else {
+                title.textContent = 'Add Character';
+                document.getElementById('characterName').value = '';
+                document.getElementById('characterRole').value = '';
+                document.getElementById('characterDescription').value = '';
+                document.getElementById('characterConnections').value = '';
+                currentCharacterId = null;
+                deleteBtn.style.display = 'none';
+            }
+            
+            modal.classList.add('show');
+        }
+
+        // Close character modal
+        function closeCharacterModal() {
+            document.getElementById('characterModal').classList.remove('show');
+            currentCharacterId = null;
+        }
+
+        // Save character
+        async function saveCharacter(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('characterName').value.trim();
+            const role = document.getElementById('characterRole').value.trim();
+            const description = document.getElementById('characterDescription').value.trim();
+            const connectionsInput = document.getElementById('characterConnections').value.trim();
+            const connections = connectionsInput ? connectionsInput.split(',').map(c => c.trim()).filter(c => c) : [];
+            
+            if (currentCharacterId) {
+                // Edit existing character
+                const character = characters.find(c => c.id === currentCharacterId);
+                if (character) {
+                    character.name = name;
+                    character.role = role;
+                    character.description = description;
+                    character.connections = connections;
+                    await saveCharacterToStorage(character);
+                }
+            } else {
+                // Add new character
+                const newCharacter = {
+                    id: Date.now().toString(),
+                    name,
+                    role,
+                    description,
+                    connections,
+                    mentions: 0,
+                    createdAt: new Date().toISOString()
+                };
+                characters.push(newCharacter);
+                await saveCharacterToStorage(newCharacter);
+            }
+            
+            characters.sort((a, b) => a.name.localeCompare(b.name));
+            renderCharacterList();
+            updateCharacterMetrics();
+            closeCharacterModal();
+        }
+
+        // Delete character
+        async function deleteCurrentCharacter() {
+            if (!currentCharacterId || !confirm('Are you sure you want to delete this character?')) return;
+            
+            try {
+                await window.storage.delete(`project:${currentProjectId}:character:${currentCharacterId}`);
+                characters = characters.filter(c => c.id !== currentCharacterId);
+                renderCharacterList();
+                updateCharacterMetrics();
+                closeCharacterModal();
+            } catch (error) {
+                console.error('Failed to delete character:', error);
+            }
+        }
+
+        // Update character metrics by analyzing all chapters
+        function updateCharacterMetrics() {
+            // Reset all mention counts
+            characters.forEach(char => {
+                char.mentions = 0;
+            });
+            
+            // Count mentions in all chapters
+            const allText = chapters.map(ch => ch.content).join(' ').toLowerCase();
+            
+            characters.forEach(char => {
+                const name = char.name.toLowerCase();
+                const regex = new RegExp('\\b' + name + '\\b', 'gi');
+                const matches = allText.match(regex);
+                char.mentions = matches ? matches.length : 0;
+            });
+            
+            renderCharacterList();
+        }
+
+        // Render character list
+        function renderCharacterList() {
+            const list = document.getElementById('characterList');
+            if (characters.length === 0) {
+                list.innerHTML = '<p style="color: var(--sepia); font-size: 0.9rem; text-align: center; padding: 2rem;">No characters yet. Add your first character!</p>';
+                return;
+            }
+            
+            list.innerHTML = characters.map(char => `
+                <li class="character-card" onclick="openCharacterModal('${char.id}')">
+                    <div class="character-name">${char.name}</div>
+                    ${char.role ? `<div class="character-role">${char.role}</div>` : ''}
+                    <div class="character-metrics">
+                        <div class="character-metric">
+                            <span class="character-metric-label">Mentions</span>
+                            <span class="character-metric-value">${char.mentions || 0}</span>
+                        </div>
+                        <div class="character-metric">
+                            <span class="character-metric-label">Connections</span>
+                            <span class="character-metric-value">${char.connections?.length || 0}</span>
+                        </div>
+                    </div>
+                    ${char.connections && char.connections.length > 0 ? `
+                        <div class="character-connections">
+                            <span class="connections-label">Connected to:</span>
+                            <div class="connection-tags">
+                                ${char.connections.map(conn => `<span class="connection-tag">${conn}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </li>
+            `).join('');
+        }
+
+        // Toggle character panel
+        function toggleCharacterPanel() {
+            const panel = document.getElementById('characterPanel');
+            const container = document.querySelector('.app-container');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                container.classList.remove('hide-character-panel');
+            } else {
+                panel.style.display = 'none';
+                container.classList.add('hide-character-panel');
+            }
+        }
+
+        // ========== GRAMMAR CHECKING ==========
+
+        async function checkGrammar() {
+            const content = document.getElementById('editorContent').value;
+            
+            if (!content.trim()) {
+                alert('Please write some content first');
+                return;
+            }
+
+            const modal = document.getElementById('grammarModal');
+            const results = document.getElementById('grammarResults');
+            
+            modal.classList.add('show');
+            results.innerHTML = '<div class="loading">Analyzing your writing...</div>';
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [
+                            { 
+                                role: 'user', 
+                                content: `You are a professional editor. Analyze this text for grammar, spelling, style, and readability issues. Provide specific, actionable suggestions. Format your response as a list of issues, each with: 1) The type of issue (Grammar, Spelling, Style, etc.), 2) The problematic text, 3) Your suggestion for improvement.
+
+Text to analyze:
+${content}
+
+Please be concise and focus on the most important issues.` 
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                const suggestions = data.content.find(item => item.type === 'text')?.text || 'No issues found!';
+
+                // Parse the suggestions and create formatted output
+                const lines = suggestions.split('\n').filter(line => line.trim());
+                let formattedSuggestions = '';
+                let currentIssue = null;
+
+                lines.forEach(line => {
+                    if (line.match(/^\d+\.|^-/)) {
+                        if (currentIssue) {
+                            formattedSuggestions += `
+                                <div class="grammar-issue">
+                                    <div class="grammar-issue-type">${currentIssue.type}</div>
+                                    <div class="grammar-issue-text">${currentIssue.text}</div>
+                                    <div class="grammar-issue-suggestion">${currentIssue.suggestion}</div>
+                                </div>
+                            `;
+                        }
+                        currentIssue = { type: 'Issue', text: line, suggestion: '' };
+                    } else if (currentIssue) {
+                        if (line.toLowerCase().includes('grammar')) currentIssue.type = 'Grammar';
+                        else if (line.toLowerCase().includes('spelling')) currentIssue.type = 'Spelling';
+                        else if (line.toLowerCase().includes('style')) currentIssue.type = 'Style';
+                        else if (line.toLowerCase().includes('punctuation')) currentIssue.type = 'Punctuation';
+                        
+                        currentIssue.suggestion += line + ' ';
+                    }
+                });
+
+                if (currentIssue) {
+                    formattedSuggestions += `
+                        <div class="grammar-issue">
+                            <div class="grammar-issue-type">${currentIssue.type}</div>
+                            <div class="grammar-issue-text">${currentIssue.text}</div>
+                            <div class="grammar-issue-suggestion">${currentIssue.suggestion}</div>
+                        </div>
+                    `;
+                }
+
+                results.innerHTML = formattedSuggestions || `
+                    <div class="grammar-issue suggestion">
+                        <div class="grammar-issue-text">${suggestions}</div>
+                    </div>
+                `;
+
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="grammar-issue error">
+                        <div class="grammar-issue-type">Error</div>
+                        <div class="grammar-issue-text">Failed to check grammar. Please try again.</div>
+                    </div>
+                `;
+                console.error('Grammar check error:', error);
+            }
+        }
+
+        function closeGrammarModal() {
+            document.getElementById('grammarModal').classList.remove('show');
+        }
+
+        // ========== VERSION HISTORY ==========
+
+        async function openVersionHistory() {
+            if (!currentChapterId) {
+                alert('Please select a chapter first');
+                return;
+            }
+            
+            const modal = document.getElementById('versionModal');
+            modal.classList.add('show');
+            selectedVersionId = null;
+            
+            await loadVersionHistory();
+        }
+
+        function closeVersionHistory() {
+            document.getElementById('versionModal').classList.remove('show');
+            selectedVersionId = null;
+        }
+
+        async function loadVersionHistory() {
+            const versionList = document.getElementById('versionList');
+            const versionKey = `project:${currentProjectId}:versions:${currentChapterId}`;
+            
+            try {
+                const result = await window.storage.get(versionKey);
+                if (result) {
+                    const versions = JSON.parse(result.value);
+                    
+                    if (versions.length === 0) {
+                        versionList.innerHTML = `
+                            <div class="version-empty">
+                                <div class="version-empty-icon">🕐</div>
+                                <p>No version history yet.<br>Versions are auto-saved as you write.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    versionList.innerHTML = versions.map((version, index) => {
+                        const date = new Date(version.timestamp);
+                        const timeAgo = getTimeAgo(date);
+                        const isLatest = index === 0;
+                        
+                        return `
+                            <li class="version-item" onclick="selectVersion('${version.id}')">
+                                <div class="version-timestamp">
+                                    ${isLatest ? '⭐ ' : ''}${timeAgo}
+                                    <br>${date.toLocaleString()}
+                                </div>
+                                <div class="version-info">
+                                    <span>${version.wordCount} words</span>
+                                    ${isLatest ? '<span style="color: var(--gold); font-weight: 600;">Latest</span>' : ''}
+                                </div>
+                            </li>
+                        `;
+                    }).join('');
+                } else {
+                    versionList.innerHTML = `
+                        <div class="version-empty">
+                            <div class="version-empty-icon">🕐</div>
+                            <p>No version history yet.<br>Versions are auto-saved as you write.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                versionList.innerHTML = `
+                    <div class="version-empty">
+                        <div class="version-empty-icon">🕐</div>
+                        <p>No version history yet.<br>Versions are auto-saved as you write.</p>
+                    </div>
+                `;
+            }
+            
+            // Reset preview
+            document.getElementById('versionPreview').innerHTML = `
+                <div class="version-empty">
+                    <div class="version-empty-icon">🕐</div>
+                    <p>Select a version to preview</p>
+                </div>
+            `;
+            
+            // Disable buttons
+            document.getElementById('restoreVersionBtn').disabled = true;
+            document.getElementById('deleteVersionBtn').disabled = true;
+        }
+
+        async function selectVersion(versionId) {
+            selectedVersionId = versionId;
+            
+            const versionKey = `project:${currentProjectId}:versions:${currentChapterId}`;
+            const result = await window.storage.get(versionKey);
+            
+            if (result) {
+                const versions = JSON.parse(result.value);
+                const version = versions.find(v => v.id === versionId);
+                
+                if (version) {
+                    const date = new Date(version.timestamp);
+                    
+                    document.getElementById('versionPreview').innerHTML = `
+                        <div class="version-preview-header">
+                            <div class="version-preview-title">${version.title}</div>
+                            <div class="version-preview-meta">
+                                Saved: ${date.toLocaleString()} • ${version.wordCount} words
+                            </div>
+                        </div>
+                        <div class="version-preview-content">${version.content}</div>
+                    `;
+                    
+                    // Highlight selected version
+                    document.querySelectorAll('.version-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    event.target.closest('.version-item').classList.add('active');
+                    
+                    // Enable buttons
+                    document.getElementById('restoreVersionBtn').disabled = false;
+                    document.getElementById('deleteVersionBtn').disabled = false;
+                }
+            }
+        }
+
+        async function restoreSelectedVersion() {
+            if (!selectedVersionId || !currentChapterId) return;
+            
+            if (!confirm('Are you sure you want to restore this version? Your current content will be saved as a new version before restoring.')) {
+                return;
+            }
+            
+            // Save current state as a version before restoring
+            await saveVersion();
+            
+            const versionKey = `project:${currentProjectId}:versions:${currentChapterId}`;
+            const result = await window.storage.get(versionKey);
+            
+            if (result) {
+                const versions = JSON.parse(result.value);
+                const version = versions.find(v => v.id === selectedVersionId);
+                
+                if (version) {
+                    // Update current chapter
+                    const chapter = chapters.find(ch => ch.id === currentChapterId);
+                    if (chapter) {
+                        chapter.title = version.title;
+                        chapter.content = version.content;
+                        chapter.wordCount = version.wordCount;
+                        chapter.lastModified = new Date().toISOString();
+                        
+                        await saveChapter(chapter);
+                        
+                        // Update UI
+                        document.getElementById('chapterTitle').value = chapter.title;
+                        document.getElementById('editorContent').value = chapter.content;
+                        updateStats();
+                        renderChapterList();
+                        updateManuscriptStats();
+                        
+                        // Save this restoration as a new version
+                        await saveVersion();
+                        
+                        alert('Version restored successfully!');
+                        closeVersionHistory();
+                    }
+                }
+            }
+        }
+
+        async function deleteSelectedVersion() {
+            if (!selectedVersionId || !currentChapterId) return;
+            
+            if (!confirm('Are you sure you want to delete this version? This cannot be undone.')) {
+                return;
+            }
+            
+            const versionKey = `project:${currentProjectId}:versions:${currentChapterId}`;
+            const result = await window.storage.get(versionKey);
+            
+            if (result) {
+                let versions = JSON.parse(result.value);
+                versions = versions.filter(v => v.id !== selectedVersionId);
+                
+                await window.storage.set(versionKey, JSON.stringify(versions));
+                
+                selectedVersionId = null;
+                await loadVersionHistory();
+            }
+        }
+
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+            return `${Math.floor(seconds / 604800)} weeks ago`;
+        }
+
+        // Update character metrics when content changes
+        const originalSaveCurrentChapter = saveCurrentChapter;
+        saveCurrentChapter = function() {
+            originalSaveCurrentChapter();
+            updateCharacterMetrics();
+        };
+
+        // ========== AI BUBBLE ASSISTANT ==========
+
+        let selectedText = '';
+
+        function toggleAIPanel() {
+            const bubble = document.getElementById('aiBubble');
+            const panel = document.getElementById('aiPanelExpanded');
+            
+            if (panel.classList.contains('show')) {
+                panel.classList.remove('show');
+                bubble.classList.remove('expanded');
+            } else {
+                panel.classList.add('show');
+                bubble.classList.add('expanded');
+                checkSelectedText();
+            }
+        }
+
+        function checkSelectedText() {
+            const editor = document.getElementById('editorContent');
+            const selection = editor.value.substring(editor.selectionStart, editor.selectionEnd);
+            
+            if (selection && selection.trim().length > 0) {
+                selectedText = selection;
+                document.getElementById('selectedTextContainer').innerHTML = `
+                    <div class="ai-selected-text">
+                        <div class="ai-selected-label">Selected Text:</div>
+                        <div>${selectedText}</div>
+                    </div>
+                `;
+            } else {
+                selectedText = '';
+                document.getElementById('selectedTextContainer').innerHTML = '';
+            }
+        }
+
+        // Listen for text selection
+        document.addEventListener('selectionchange', () => {
+            const editor = document.getElementById('editorContent');
+            if (document.activeElement === editor) {
+                const selection = editor.value.substring(editor.selectionStart, editor.selectionEnd);
+                if (selection && selection.trim().length > 0) {
+                    selectedText = selection;
+                }
+            }
+        });
+
+        async function quickAIAction(action) {
+            const editor = document.getElementById('editorContent');
+            const selection = window.getSelection();
+            const selectedText = selection.toString().trim();
+            const textToAnalyze = selectedText || (editor.innerText || editor.textContent || '');
+            
+            if (!textToAnalyze.trim()) {
+                alert('Please write some content or select text first');
+                return;
+            }
+
+            // Clear previous response
+            document.getElementById('aiBubbleResponseContainer').innerHTML = '';
+
+            let prompt = '';
+            switch(action) {
+                case 'improve':
+                    prompt = 'Improve this text to make it more engaging and polished:';
+                    break;
+                case 'grammar':
+                    prompt = 'Check this text for grammar, spelling, and punctuation errors:';
+                    break;
+                case 'expand':
+                    prompt = 'Expand this text with more details, descriptions, and depth:';
+                    break;
+                case 'shorten':
+                    prompt = 'Make this text more concise while keeping the key information:';
+                    break;
+            }
+
+            await submitAIRequestWithPrompt(`${prompt}\n\n${textToAnalyze}`);
+        }
+
+        async function submitAIRequest() {
+            const customPrompt = document.getElementById('aiBubblePrompt').value.trim();
+            const editor = document.getElementById('editorContent');
+            const selection = window.getSelection();
+            const selectedText = selection.toString().trim();
+            
+            if (!customPrompt) {
+                alert('Please enter a prompt');
+                return;
+            }
+
+            // Clear previous response
+            document.getElementById('aiBubbleResponseContainer').innerHTML = '';
+
+            const includeCurrentChapter = document.getElementById('includeCurrentChapter').checked;
+            const includeAllChapters = document.getElementById('includeAllChapters').checked;
+
+            let fullPrompt = customPrompt;
+            
+            // Priority: Selection > Current Chapter > All Chapters
+            if (selectedText) {
+                fullPrompt += `\n\nSelected text:\n${selectedText}`;
+            } else if (includeCurrentChapter && currentChapterId) {
+                const chapter = chapters.find(ch => ch.id === currentChapterId);
+                if (chapter) {
+                    // Get text content without HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = chapter.content;
+                    const textContent = tempDiv.innerText || tempDiv.textContent || '';
+                    fullPrompt += `\n\nCurrent chapter (${chapter.title}):\n${textContent}`;
+                }
+            }
+            
+            if (includeAllChapters) {
+                fullPrompt += '\n\nAll chapters:\n';
+                chapters.forEach(ch => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = ch.content;
+                    const textContent = tempDiv.innerText || tempDiv.textContent || '';
+                    fullPrompt += `\n--- ${ch.title} ---\n${textContent}\n`;
+                });
+            }
+
+            await submitAIRequestWithPrompt(fullPrompt);
+        }
+
+        function setQuickPrompt(prompt) {
+            document.getElementById('aiBubblePrompt').value = prompt;
+        }
+
+        async function submitAIRequestWithPrompt(prompt) {
+            const submitBtn = document.getElementById('aiBubbleSubmit');
+            const responseContainer = document.getElementById('aiBubbleResponseContainer');
+            const panelBody = document.querySelector('.ai-panel-expanded .ai-panel-body');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Thinking...';
+            responseContainer.innerHTML = '<div class="loading">Claude is analyzing your writing...</div>';
+            
+            // Scroll to loading indicator
+            setTimeout(() => {
+                responseContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [
+                            { role: 'user', content: `You are a professional writing assistant helping an author with their book. ${prompt}` }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                const suggestion = data.content.find(item => item.type === 'text')?.text || 'No suggestion available';
+
+                responseContainer.innerHTML = `
+                    <div class="ai-bubble-response">
+                        <h4>Claude's Suggestion</h4>
+                        <div class="ai-bubble-response-content">${suggestion}</div>
+                    </div>
+                `;
+                
+                // Scroll to response smoothly and highlight it
+                setTimeout(() => {
+                    responseContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    // Add flash animation
+                    const responseEl = responseContainer.querySelector('.ai-bubble-response');
+                    responseEl.style.animation = 'flashHighlight 1s ease';
+                }, 100);
+                
+            } catch (error) {
+                responseContainer.innerHTML = `
+                    <div class="ai-bubble-response">
+                        <h4>Error</h4>
+                        <div class="ai-bubble-response-content">Failed to get suggestions. Please try again.</div>
+                    </div>
+                `;
+                console.error('AI suggestion error:', error);
+                
+                // Scroll to error
+                setTimeout(() => {
+                    responseContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Get Suggestions';
+            }
+        }
+
+        // ========== CHARACTER PANEL FUNCTIONS ==========
+
+        function openCharacterPanel() {
+            document.getElementById('characterPanel').classList.add('show');
+            updateLinkedCharacters();
+        }
+
+        function closeCharacterPanel() {
+            document.getElementById('characterPanel').classList.remove('show');
+        }
+
+        // Update the old toggleCharacterPanel function
+        function toggleCharacterPanel() {
+            const panel = document.getElementById('characterPanel');
+            if (panel.classList.contains('show')) {
+                closeCharacterPanel();
+            } else {
+                openCharacterPanel();
+            }
+        }
+
+        async function updateLinkedCharacters() {
+            const currentProject = projects.find(p => p.id === currentProjectId);
+            const linkedResourcesPanel = document.getElementById('linkedResourcesPanel');
+            const linkedCharactersContainer = document.getElementById('linkedCharactersContainer');
+            
+            if (!currentProject || !currentProject.seriesLinks || currentProject.seriesLinks.length === 0) {
+                linkedResourcesPanel.style.display = 'none';
+                return;
+            }
+            
+            linkedResourcesPanel.style.display = 'block';
+            
+            // Load characters from all linked projects
+            let linkedCharacters = [];
+            
+            for (const linkedProjectId of currentProject.seriesLinks) {
+                const linkedProject = projects.find(p => p.id === linkedProjectId);
+                if (!linkedProject) continue;
+                
+                try {
+                    const keys = await window.storage.list(`project:${linkedProjectId}:character:`);
+                    if (keys && keys.keys) {
+                        for (const key of keys.keys) {
+                            const result = await window.storage.get(key);
+                            if (result) {
+                                const character = JSON.parse(result.value);
+                                linkedCharacters.push({
+                                    ...character,
+                                    sourceName: linkedProject.name,
+                                    sourceId: linkedProjectId
+                                });
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.log('No characters found in linked project');
+                }
+            }
+            
+            if (linkedCharacters.length === 0) {
+                linkedCharactersContainer.innerHTML = '<p style="font-size: 0.85rem; color: var(--sepia); text-align: center; padding: 1rem;">No characters in linked projects yet.</p>';
+                return;
+            }
+            
+            linkedCharactersContainer.innerHTML = linkedCharacters.map(char => `
+                <div class="linked-character-item">
+                    <div class="linked-character-name">${char.name}</div>
+                    ${char.role ? `<div style="font-size: 0.8rem; color: var(--sepia); font-style: italic; margin-top: 0.25rem;">${char.role}</div>` : ''}
+                    <div class="linked-character-source">From: ${char.sourceName}</div>
+                    ${char.description ? `<div style="font-size: 0.85rem; color: var(--ink); margin-top: 0.5rem; line-height: 1.4;">${char.description}</div>` : ''}
+                    ${char.connections && char.connections.length > 0 ? `
+                        <div style="margin-top: 0.5rem; font-size: 0.75rem;">
+                            <span style="color: var(--sepia);">Connected to: </span>
+                            ${char.connections.map(c => `<span style="color: var(--accent); font-weight: 600;">${c}</span>`).join(', ')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // ========== AI IMAGE GENERATION ==========
+
+        let selectedImageType = 'character';
+        let selectedImageStyle = 'realistic';
+        let currentGeneratedImageUrl = null;
+
+        function openAIImageModal() {
+            document.getElementById('aiImageModal').classList.add('show');
+        }
+
+        function closeAIImageModal() {
+            document.getElementById('aiImageModal').classList.remove('show');
+        }
+
+        function selectImageType(type) {
+            selectedImageType = type;
+            document.querySelectorAll('.image-type-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+        }
+
+        function selectImageStyle(style) {
+            selectedImageStyle = style;
+            document.querySelectorAll('.image-style-chip').forEach(chip => {
+                chip.classList.remove('selected');
+            });
+            document.querySelector(`[data-style="${style}"]`).classList.add('selected');
+        }
+
+        async function generateAIImage() {
+            const promptInput = document.getElementById('imagePromptInput').value.trim();
+            
+            if (!promptInput) {
+                alert('Please describe what you want to visualize');
+                return;
+            }
+
+            const btn = document.getElementById('generateImageBtn');
+            const container = document.getElementById('generatedImageContainer');
+            
+            btn.disabled = true;
+            btn.textContent = 'Generating...';
+            container.classList.remove('show');
+
+            // Build enhanced prompt based on selections
+            let enhancedPrompt = promptInput;
+            
+            if (selectedImageType === 'character') {
+                enhancedPrompt = `Character portrait: ${promptInput}`;
+            } else {
+                enhancedPrompt = `Scene or location: ${promptInput}`;
+            }
+
+            // Add style guidance
+            const styleGuides = {
+                realistic: 'photorealistic, highly detailed',
+                painterly: 'oil painting style, artistic, brushstrokes',
+                illustration: 'digital illustration, clean lines, colored',
+                sketch: 'pencil sketch, monochrome, artistic',
+                cinematic: 'cinematic lighting, dramatic, movie still',
+                fantasy: 'fantasy art, magical, ethereal'
+            };
+            
+            enhancedPrompt += `, ${styleGuides[selectedImageStyle]}`;
+
+            try {
+                // Note: This is a placeholder for actual image generation
+                // In production, you'd integrate with an image generation API like DALL-E, Midjourney, or Stable Diffusion
+                
+                // For demonstration, we'll show a message
+                alert(`Image generation would create:\n\nType: ${selectedImageType}\nStyle: ${selectedImageStyle}\n\nPrompt: ${enhancedPrompt}\n\nNote: Connect this to an image generation API like DALL-E, Midjourney, or Stable Diffusion for actual image creation.`);
+                
+                // Simulate image generation
+                setTimeout(() => {
+                    // You would replace this with actual API call
+                    // const response = await fetch('your-image-api-endpoint', {...});
+                    // const imageUrl = response.imageUrl;
+                    
+                    // For demo purposes, using a placeholder
+                    const placeholderUrl = `https://via.placeholder.com/512x512/8B5CF6/FFFFFF?text=${selectedImageType}+${selectedImageStyle}`;
+                    
+                    document.getElementById('generatedImage').src = placeholderUrl;
+                    currentGeneratedImageUrl = placeholderUrl;
+                    container.classList.add('show');
+                    
+                    btn.disabled = false;
+                    btn.textContent = '✨ Generate Visual';
+                }, 1000);
+                
+            } catch (error) {
+                alert('Failed to generate image. Please try again.');
+                console.error('Image generation error:', error);
+                btn.disabled = false;
+                btn.textContent = '✨ Generate Visual';
+            }
+        }
+
+        function downloadGeneratedImage() {
+            if (!currentGeneratedImageUrl) return;
+            
+            const link = document.createElement('a');
+            link.href = currentGeneratedImageUrl;
+            link.download = `generated-${selectedImageType}-${Date.now()}.png`;
+            link.click();
+        }
+
+        function regenerateImage() {
+            generateAIImage();
+        }
+
+        // ========== WRITING GOALS TRACKING ==========
+
+        let sessionStartTime = Date.now();
+        let dailyWordGoal = 1000;
+        let sessionTimeGoal = 60; // minutes
+        let todayStartWords = 0;
+
+        function openWritingGoalsModal() {
+            document.getElementById('writingGoalsModal').classList.add('show');
+            // Load saved goals
+            document.getElementById('wordGoalInput').value = dailyWordGoal;
+            document.getElementById('timeGoalInput').value = sessionTimeGoal;
+            updateWritingGoals();
+        }
+
+        function closeWritingGoalsModal() {
+            document.getElementById('writingGoalsModal').classList.remove('show');
+        }
+
+        function saveWritingGoals() {
+            const newWordGoal = parseInt(document.getElementById('wordGoalInput').value);
+            const newTimeGoal = parseInt(document.getElementById('timeGoalInput').value);
+            
+            if (newWordGoal && newWordGoal > 0) dailyWordGoal = newWordGoal;
+            if (newTimeGoal && newTimeGoal > 0) sessionTimeGoal = newTimeGoal;
+            
+            updateWritingGoals();
+            
+            // Show success feedback
+            const btn = document.querySelector('.save-goals-btn');
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Goals Saved!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+
+        function updateWritingGoals() {
+            // Calculate total words written today (simplified - in production, would track per day)
+            const totalWords = chapters.reduce((sum, ch) => sum + ch.wordCount, 0);
+            const todayWords = Math.min(totalWords, dailyWordGoal);
+            
+            // Update daily words display
+            document.getElementById('todayWordsValue').textContent = todayWords;
+            const dailyProgress = Math.min((todayWords / dailyWordGoal) * 100, 100);
+            document.getElementById('dailyWordsProgressBar').style.width = `${dailyProgress}%`;
+            document.getElementById('dailyWordsProgressText').textContent = 
+                `${todayWords} / ${dailyWordGoal} words (${Math.round(dailyProgress)}%)`;
+            
+            // Calculate session time
+            const sessionMinutes = Math.floor((Date.now() - sessionStartTime) / 60000);
+            document.getElementById('sessionTimeValue').textContent = `${sessionMinutes}m`;
+            const timeProgress = Math.min((sessionMinutes / sessionTimeGoal) * 100, 100);
+            document.getElementById('sessionTimeProgressBar').style.width = `${timeProgress}%`;
+            document.getElementById('sessionTimeProgressText').textContent = 
+                `${sessionMinutes} / ${sessionTimeGoal} minutes (${Math.round(timeProgress)}%)`;
+        }
+
+        // Update goals every minute
+        setInterval(updateWritingGoals, 60000);
+
+        // Initial goals update
+        updateWritingGoals();
+
+        // Close color dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.color-picker-wrapper')) {
+                document.querySelectorAll('.color-dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('show');
+                });
+            }
+        });
+
+        // ========== COMMENT SYSTEM ==========
+
+        async function loadComments() {
+    if (!currentChapterId) return;
+    
+    try {
+        const commentKey = `project:${currentProjectId}:chapter:${currentChapterId}:comments`;
+        const result = await window.storage.get(commentKey);
+        if (result) {
+            comments = JSON.parse(result.value);
+        } else {
+            comments = [];
+        }
+    } catch (error) {
+        comments = [];
+    }
+    
+    renderComments();
+}
+
+async function saveCommentsToStorage() {
+    if (!currentChapterId) return;
+    
+    try {
+        const commentKey = `project:${currentProjectId}:chapter:${currentChapterId}:comments`;
+        await window.storage.set(commentKey, JSON.stringify(comments));
+        updateCommentsBadge();
+    } catch (error) {
+        console.error('Failed to save comments:', error);
+    }
+}
+
+function openCommentModal() {
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
+    
+    if (!selectedText || selectedText.length === 0) {
+        alert('Please select some text to comment on');
+        return;
+    }
+    
+    currentCommentText = selectedText;
+    document.getElementById('commentSelectedText').textContent = `"${selectedText}"`;
+    document.getElementById('commentInput').value = '';
+    document.getElementById('commentModal').classList.add('show');
+}
+
+function closeCommentModal() {
+    document.getElementById('commentModal').classList.remove('show');
+    currentCommentText = '';
+}
+
+async function saveComment() {
+    const commentText = document.getElementById('commentInput').value.trim();
+    
+    if (!commentText) {
+        alert('Please enter a comment');
+        return;
+    }
+    
+    const comment = {
+        id: Date.now().toString(),
+        chapterId: currentChapterId,
+        quotedText: currentCommentText,
+        commentText: commentText,
+        author: 'You',  // In production, would be actual user name
+        timestamp: new Date().toISOString()
+    };
+    
+    comments.push(comment);
+    await saveCommentsToStorage();
+    renderComments();
+    closeCommentModal();
+    
+    // Auto-open comments panel to show the new comment
+    document.getElementById('commentsPanel').classList.add('show');
+}
+
+function renderComments() {
+    const commentsList = document.getElementById('commentsList');
+    
+    if (comments.length === 0) {
+        commentsList.innerHTML = '<p style="text-align: center; color: var(--sepia); padding: 2rem;">No comments yet</p>';
+        return;
+    }
+    
+    commentsList.innerHTML = comments.map(comment => `
+        <div class="comment-item">
+            <div class="comment-author">${comment.author}</div>
+            <div class="comment-timestamp">${new Date(comment.timestamp).toLocaleString()}</div>
+            <div class="comment-quoted-text">"${comment.quotedText}"</div>
+            <div class="comment-text">${comment.commentText}</div>
+            <div class="comment-item-actions">
+                <button class="comment-item-btn delete" onclick="deleteComment('${comment.id}')">Delete</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function deleteComment(commentId) {
+    if (!confirm('Delete this comment?')) return;
+    
+    comments = comments.filter(c => c.id !== commentId);
+    await saveCommentsToStorage();
+    renderComments();
+}
+
+function toggleCommentsPanel() {
+    document.getElementById('commentsPanel').classList.toggle('show');
+}
+
+function updateCommentsBadge() {
+    const badge = document.getElementById('commentsBadge');
+    if (comments.length > 0) {
+        badge.textContent = comments.length;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// ========== COLLABORATION ==========
+
+let collaborators = [];
+
+async function loadCollaborators() {
+    if (!currentProjectId) return;
+    
+    try {
+        const collabKey = `project:${currentProjectId}:collaborators`;
+        const result = await window.storage.get(collabKey);
+        if (result) {
+            collaborators = JSON.parse(result.value);
+        } else {
+            collaborators = [];
+        }
+    } catch (error) {
+        collaborators = [];
+    }
+}
+
+async function saveCollaborators() {
+    if (!currentProjectId) return;
+    
+    try {
+        const collabKey = `project:${currentProjectId}:collaborators`;
+        await window.storage.set(collabKey, JSON.stringify(collaborators));
+    } catch (error) {
+        console.error('Failed to save collaborators:', error);
+    }
+}
+
+function openCollabModal() {
+    document.getElementById('collabModal').classList.add('show');
+    renderCollaboratorsList();
+}
+
+function closeCollabModal() {
+    document.getElementById('collabModal').classList.remove('show');
+}
+
+async function addCollaborator() {
+    const emailInput = document.getElementById('collabEmailInput');
+    const permissionSelect = document.getElementById('collabPermissionSelect');
+    
+    const email = emailInput.value.trim();
+    const permission = permissionSelect.value;
+    
+    if (!email) {
+        alert('Please enter an email address');
+        return;
+    }
+    
+    // Basic email validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert('Please enter a valid email address');
+        return;
+    }
+    
+    // Check if already exists
+    if (collaborators.find(c => c.email === email)) {
+        alert('This collaborator is already added');
+        return;
+    }
+    
+    const collaborator = {
+        id: Date.now().toString(),
+        email: email,
+        permission: permission,
+        addedAt: new Date().toISOString()
+    };
+    
+    collaborators.push(collaborator);
+    await saveCollaborators();
+    
+    emailInput.value = '';
+    renderCollaboratorsList();
+    
+    alert(`Invitation sent to ${email} with ${permission} access!\n\nNote: In production, this would send an actual email invitation.`);
+}
+
+function renderCollaboratorsList() {
+    const collabList = document.getElementById('collabList');
+    
+    if (collaborators.length === 0) {
+        collabList.innerHTML = '<p style="text-align: center; color: var(--sepia); padding: 2rem;">No collaborators yet</p>';
+        return;
+    }
+    
+    collabList.innerHTML = collaborators.map(collab => `
+        <li class="collab-item">
+            <div class="collab-info">
+                <div class="collab-email">${collab.email}</div>
+                <span class="collab-permission-badge ${collab.permission}">
+                    ${collab.permission === 'view' ? '👁️ Can View' : 
+                      collab.permission === 'comment' ? '💬 Can Comment' : '✏️ Can Edit'}
+                </span>
+            </div>
+            <div class="collab-actions">
+                <button class="collab-change-permission-btn" onclick="changePermission('${collab.id}')">
+                    Change
+                </button>
+                <button class="collab-remove-btn" onclick="removeCollaborator('${collab.id}')">
+                    Remove
+                </button>
+            </div>
+        </li>
+    `).join('');
+}
+
+async function changePermission(collabId) {
+    const collab = collaborators.find(c => c.id === collabId);
+    if (!collab) return;
+    
+    const permissions = ['view', 'comment', 'edit'];
+    const currentIndex = permissions.indexOf(collab.permission);
+    const nextIndex = (currentIndex + 1) % permissions.length;
+    
+    collab.permission = permissions[nextIndex];
+    await saveCollaborators();
+    renderCollaboratorsList();
+}
+
+async function removeCollaborator(collabId) {
+    if (!confirm('Remove this collaborator?')) return;
+    
+    collaborators = collaborators.filter(c => c.id !== collabId);
+    await saveCollaborators();
+    renderCollaboratorsList();
+}
+    </script>
+
+    <!-- Comment Modal -->
+    <div class="comment-modal" id="commentModal">
+        <div class="comment-modal-content">
+            <h3>Add Comment</h3>
+            <div class="comment-selected-text" id="commentSelectedText"></div>
+            <textarea class="comment-input" id="commentInput" placeholder="Enter your comment..."></textarea>
+            <div class="comment-actions">
+                <button class="comment-action-btn cancel" onclick="closeCommentModal()">Cancel</button>
+                <button class="comment-action-btn save" onclick="saveComment()">Save Comment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Panel -->
+    <div class="comments-panel" id="commentsPanel">
+        <div class="comments-panel-header">
+            <div class="comments-panel-title">Comments</div>
+            <button class="close-comments-btn" onclick="toggleCommentsPanel()">×</button>
+        </div>
+        <div class="comments-list" id="commentsList">
+            <p style="text-align: center; color: var(--sepia); padding: 2rem;">No comments yet</p>
+        </div>
+    </div>
+
+    <!-- Collaboration Modal -->
+    <div class="collab-modal" id="collabModal">
+        <div class="collab-modal-content">
+            <h3>Share & Collaborate</h3>
+            <p class="collab-modal-subtitle">Invite collaborators to view, comment, or edit this project</p>
+            
+            <div class="collab-add-section">
+                <div class="collab-add-title">Add Collaborator</div>
+                <div class="collab-input-group">
+                    <input type="email" class="collab-email-input" id="collabEmailInput" placeholder="Enter email address...">
+                    <select class="collab-permission-select" id="collabPermissionSelect">
+                        <option value="view">Can View</option>
+                        <option value="comment">Can Comment</option>
+                        <option value="edit">Can Edit</option>
+                    </select>
+                    <button class="collab-add-btn" onclick="addCollaborator()">Add</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="collab-list-title">Current Collaborators</div>
+                <ul class="collab-list" id="collabList"></ul>
+            </div>
+
+            <button class="close-collab-modal-btn" onclick="closeCollabModal()">Close</button>
+        </div>
+    </div>
+</body>
+</html>
