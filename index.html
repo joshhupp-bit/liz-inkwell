@@ -3531,6 +3531,9 @@
     </div>
 
     <script>
+        // Backend API URL
+        const BACKEND_URL = 'https://liz-inkwell-backend-production.up.railway.app';
+
         // Storage polyfill - must run FIRST before any other code
         if (typeof window.storage === 'undefined') {
             console.log('Storage API not available. Using localStorage fallback.');
@@ -4871,27 +4874,55 @@
             modal.classList.add('show');
             
             const checkingWhat = selectedText ? 'selected text' : 'current chapter';
-            
-            // Show informative message about grammar checking
-            results.innerHTML = `
-                <div class="grammar-result">
-                    <h4>Grammar Check Feature</h4>
-                    <p style="line-height: 1.6; margin-bottom: 1rem;">
-                        The built-in grammar checker requires API integration to function. 
-                    </p>
-                    <p style="line-height: 1.6; margin-bottom: 1rem;">
-                        In the meantime, you can:
-                    </p>
-                    <ul style="line-height: 1.8; margin-left: 1.5rem;">
-                        <li>Copy your text and paste into <strong>Grammarly</strong> or <strong>ProWritingAid</strong></li>
-                        <li>Use your browser's built-in spell checker (right-click on underlined words)</li>
-                        <li>Use the <strong>Author's AIssistant</strong> (🤖 button) with "Check grammar and style" prompt</li>
-                    </ul>
-                    <p style="line-height: 1.6; margin-top: 1.5rem; color: var(--sepia); font-size: 0.9rem;">
-                        <strong>For developers:</strong> This feature can be enabled by adding an Anthropic API key and setting up proper CORS handling on a backend server.
-                    </p>
-                </div>
-            `;
+            results.innerHTML = `<div class="loading">Analyzing your ${checkingWhat}...</div>`;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/grammar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: content,
+                        isSelection: !!selectedText
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    results.innerHTML = `
+                        <div class="grammar-result">
+                            <h4>Grammar Check Results ${data.isSelection ? '(Selected Text)' : '(Full Chapter)'}</h4>
+                            <div class="grammar-analysis" style="white-space: pre-wrap; line-height: 1.8;">${data.analysis}</div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                console.error('Grammar check error:', error);
+                results.innerHTML = `
+                    <div class="grammar-result">
+                        <h4>Grammar Check Error</h4>
+                        <p style="line-height: 1.6; margin-bottom: 1rem;">
+                            Failed to check grammar: ${error.message}
+                        </p>
+                        <p style="line-height: 1.6; margin-bottom: 1rem;">
+                            <strong>Please try:</strong>
+                        </p>
+                        <ul style="line-height: 1.8; margin-left: 1.5rem;">
+                            <li>Refresh the page and try again</li>
+                            <li>Check your internet connection</li>
+                            <li>Use <a href="https://claude.ai" target="_blank" style="color: #3B82F6;">claude.ai</a> directly as an alternative</li>
+                        </ul>
+                    </div>
+                `;
+            }
         }
 
         function closeGrammarModal() {
@@ -5239,7 +5270,6 @@
         async function submitAIRequestWithPrompt(prompt) {
             const submitBtn = document.getElementById('aiBubbleSubmit');
             const responseContainer = document.getElementById('aiBubbleResponseContainer');
-            const panelBody = document.querySelector('.ai-panel-expanded .ai-panel-body');
             
             submitBtn.disabled = true;
             submitBtn.textContent = 'Thinking...';
@@ -5251,42 +5281,58 @@
             }, 100);
 
             try {
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                const response = await fetch(`${BACKEND_URL}/api/assistant`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1000,
-                        messages: [
-                            { role: 'user', content: `You are a professional writing assistant helping an author with their book. ${prompt}` }
-                        ]
+                        prompt: prompt
                     })
                 });
 
-                const data = await response.json();
-                const suggestion = data.content.find(item => item.type === 'text')?.text || 'No suggestion available';
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
 
-                responseContainer.innerHTML = `
-                    <div class="ai-bubble-response">
-                        <h4>Claude's Suggestion</h4>
-                        <div class="ai-bubble-response-content">${suggestion}</div>
-                    </div>
-                `;
-                
-                // Scroll to response smoothly and highlight it
-                setTimeout(() => {
-                    responseContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    // Add flash animation
-                    const responseEl = responseContainer.querySelector('.ai-bubble-response');
-                    responseEl.style.animation = 'flashHighlight 1s ease';
-                }, 100);
+                const data = await response.json();
+
+                if (data.success) {
+                    responseContainer.innerHTML = `
+                        <div class="ai-bubble-response">
+                            <h4>Claude's Suggestion</h4>
+                            <div class="ai-bubble-response-content">${data.suggestion}</div>
+                        </div>
+                    `;
+                    
+                    // Scroll to response smoothly and highlight it
+                    setTimeout(() => {
+                        responseContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        const responseEl = responseContainer.querySelector('.ai-bubble-response');
+                        if (responseEl) {
+                            responseEl.style.animation = 'flashHighlight 1s ease';
+                        }
+                    }, 100);
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
                 
             } catch (error) {
+                console.error('AI Assistant error:', error);
                 responseContainer.innerHTML = `
-                    <div class="ai-bubble-response">
+                    <div class="ai-bubble-response" style="background: #FEE2E2; border-left: 3px solid #DC2626;">
                         <h4>Error</h4>
+                        <p style="line-height: 1.6;">Failed to get suggestions: ${error.message}</p>
+                        <p style="line-height: 1.6; margin-top: 1rem; font-size: 0.9rem;">
+                            Try refreshing the page or check your internet connection.
+                        </p>
+                    </div>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+            }
+        }
                         <div class="ai-bubble-response-content">Failed to get suggestions. Please try again.</div>
                     </div>
                 `;
