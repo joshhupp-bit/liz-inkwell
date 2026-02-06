@@ -3664,26 +3664,70 @@
         }
 
         function applyTextColor(color) {
-            document.execCommand('foreColor', false, color);
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            
+            const range = selection.getRangeAt(0);
+            const selectedText = range.toString();
+            
+            if (!selectedText) {
+                alert('Please select some text first');
+                return;
+            }
+            
+            // Create span with color
+            const span = document.createElement('span');
+            span.style.color = color;
+            span.textContent = selectedText;
+            
+            // Replace selection with colored span
+            range.deleteContents();
+            range.insertNode(span);
+            
+            // Update preview and close dropdown
             currentTextColor = color;
             const preview = document.getElementById('textColorPreview');
             const dropdown = document.getElementById('textColorDropdown');
             if (preview) preview.style.background = color;
             if (dropdown) dropdown.classList.remove('show');
+            
             saveCurrentChapter();
         }
 
         function applyHighlight(color) {
-            if (color === 'transparent') {
-                document.execCommand('removeFormat', false, null);
-            } else {
-                document.execCommand('backColor', false, color);
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            
+            const range = selection.getRangeAt(0);
+            const selectedText = range.toString();
+            
+            if (!selectedText) {
+                alert('Please select some text first');
+                return;
             }
+            
+            if (color === 'transparent') {
+                // Just insert plain text (remove highlight)
+                const textNode = document.createTextNode(selectedText);
+                range.deleteContents();
+                range.insertNode(textNode);
+            } else {
+                // Create mark element with background color
+                const mark = document.createElement('mark');
+                mark.style.backgroundColor = color;
+                mark.textContent = selectedText;
+                
+                range.deleteContents();
+                range.insertNode(mark);
+            }
+            
+            // Update preview and close dropdown
             currentHighlightColor = color;
             const preview = document.getElementById('highlightPreview');
             const dropdown = document.getElementById('highlightDropdown');
             if (preview) preview.style.background = color === 'transparent' ? '#ffffff' : color;
             if (dropdown) dropdown.classList.remove('show');
+            
             saveCurrentChapter();
         }
 
@@ -4601,10 +4645,16 @@
 
         async function checkGrammar() {
             const editor = document.getElementById('editorContent');
-            const content = editor.innerText || editor.textContent || '';
+            
+            // Check if there's selected text
+            const selection = window.getSelection();
+            const selectedText = selection.toString().trim();
+            
+            // Use selected text if available, otherwise use full content
+            const content = selectedText || editor.innerText || editor.textContent || '';
             
             if (!content.trim()) {
-                alert('Please write some content first');
+                alert('Please write some content or select text to check');
                 return;
             }
 
@@ -4612,7 +4662,9 @@
             const results = document.getElementById('grammarResults');
             
             modal.classList.add('show');
-            results.innerHTML = '<div class="loading">Analyzing your writing...</div>';
+            
+            const checkingWhat = selectedText ? 'selected text' : 'current chapter';
+            results.innerHTML = `<div class="loading">Analyzing your ${checkingWhat}...</div>`;
 
             try {
                 const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -4622,72 +4674,46 @@
                     },
                     body: JSON.stringify({
                         model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1000,
+                        max_tokens: 1500,
                         messages: [
                             { 
                                 role: 'user', 
-                                content: `You are a professional editor. Analyze this text for grammar, spelling, style, and readability issues. Provide specific, actionable suggestions. Format your response as a list of issues, each with: 1) The type of issue (Grammar, Spelling, Style, etc.), 2) The problematic text, 3) Your suggestion for improvement.
+                                content: `You are a professional editor. Analyze this text for grammar, spelling, style, and readability issues. Provide specific, actionable suggestions. Format your response with clear sections:
+
+**Grammar Issues:**
+List any grammar problems
+
+**Spelling & Punctuation:**
+List any spelling or punctuation errors
+
+**Style Suggestions:**
+List any style improvements
+
+**Overall Assessment:**
+Brief summary of the writing quality
 
 Text to analyze:
-${content}
-
-Please be concise and focus on the most important issues.` 
+${content}`
                             }
                         ]
                     })
                 });
 
                 const data = await response.json();
-                const suggestions = data.content.find(item => item.type === 'text')?.text || 'No issues found!';
+                const analysis = data.content.find(item => item.type === 'text')?.text || 'No analysis available';
 
-                // Parse the suggestions and create formatted output
-                const lines = suggestions.split('\n').filter(line => line.trim());
-                let formattedSuggestions = '';
-                let currentIssue = null;
-
-                lines.forEach(line => {
-                    if (line.match(/^\d+\.|^-/)) {
-                        if (currentIssue) {
-                            formattedSuggestions += `
-                                <div class="grammar-issue">
-                                    <div class="grammar-issue-type">${currentIssue.type}</div>
-                                    <div class="grammar-issue-text">${currentIssue.text}</div>
-                                    <div class="grammar-issue-suggestion">${currentIssue.suggestion}</div>
-                                </div>
-                            `;
-                        }
-                        currentIssue = { type: 'Issue', text: line, suggestion: '' };
-                    } else if (currentIssue) {
-                        if (line.toLowerCase().includes('grammar')) currentIssue.type = 'Grammar';
-                        else if (line.toLowerCase().includes('spelling')) currentIssue.type = 'Spelling';
-                        else if (line.toLowerCase().includes('style')) currentIssue.type = 'Style';
-                        else if (line.toLowerCase().includes('punctuation')) currentIssue.type = 'Punctuation';
-                        
-                        currentIssue.suggestion += line + ' ';
-                    }
-                });
-
-                if (currentIssue) {
-                    formattedSuggestions += `
-                        <div class="grammar-issue">
-                            <div class="grammar-issue-type">${currentIssue.type}</div>
-                            <div class="grammar-issue-text">${currentIssue.text}</div>
-                            <div class="grammar-issue-suggestion">${currentIssue.suggestion}</div>
-                        </div>
-                    `;
-                }
-
-                results.innerHTML = formattedSuggestions || `
-                    <div class="grammar-issue suggestion">
-                        <div class="grammar-issue-text">${suggestions}</div>
+                results.innerHTML = `
+                    <div class="grammar-result">
+                        <h4>Grammar Check Results ${selectedText ? '(Selected Text)' : '(Full Chapter)'}</h4>
+                        <div class="grammar-analysis">${analysis.replace(/\n/g, '<br>')}</div>
                     </div>
                 `;
-
             } catch (error) {
                 results.innerHTML = `
-                    <div class="grammar-issue error">
-                        <div class="grammar-issue-type">Error</div>
-                        <div class="grammar-issue-text">Failed to check grammar. Please try again.</div>
+                    <div class="grammar-result">
+                        <h4>Error</h4>
+                        <p>Failed to check grammar. Please try again.</p>
+                        <p style="color: var(--sepia); font-size: 0.85rem;">Error: ${error.message}</p>
                     </div>
                 `;
                 console.error('Grammar check error:', error);
