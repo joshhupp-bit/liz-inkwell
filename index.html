@@ -4924,9 +4924,9 @@ ${content}`
                         
                         await saveChapter(chapter);
                         
-                        // Update UI
+                        // Update UI (use innerHTML for contenteditable)
                         document.getElementById('chapterTitle').value = chapter.title;
-                        document.getElementById('editorContent').value = chapter.content;
+                        document.getElementById('editorContent').innerHTML = chapter.content || '';
                         updateStats();
                         renderChapterList();
                         updateManuscriptStats();
