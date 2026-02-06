@@ -3157,7 +3157,7 @@
                 <div class="toolbar-separator"></div>
                 
                 <div class="color-picker-wrapper">
-                    <button class="color-picker-btn" onclick="toggleColorPicker('text')" id="textColorBtn">
+                    <button class="color-picker-btn" onmousedown="event.preventDefault(); toggleColorPicker('text')" id="textColorBtn">
                         <div class="color-preview" id="textColorPreview" style="background: #000000;"></div>
                         <span>Text</span>
                     </button>
@@ -3167,7 +3167,7 @@
                 </div>
                 
                 <div class="color-picker-wrapper">
-                    <button class="color-picker-btn" onclick="toggleColorPicker('highlight')" id="highlightBtn">
+                    <button class="color-picker-btn" onmousedown="event.preventDefault(); toggleColorPicker('highlight')" id="highlightBtn">
                         <div class="color-preview" id="highlightPreview" style="background: #FFEB3B;"></div>
                         <span>Highlight</span>
                     </button>
@@ -3641,7 +3641,11 @@
                 const swatch = document.createElement('div');
                 swatch.className = 'color-swatch';
                 swatch.style.background = color;
-                swatch.onclick = () => applyTextColor(color);
+                // Use mousedown to prevent Safari from clearing selection
+                swatch.onmousedown = (e) => {
+                    e.preventDefault();
+                    applyTextColor(color);
+                };
                 textPalette.appendChild(swatch);
             });
             
@@ -3650,12 +3654,37 @@
                 swatch.className = 'color-swatch';
                 swatch.style.background = color === 'transparent' ? '#ffffff' : color;
                 if (color === 'transparent') swatch.style.border = '2px dashed #ccc';
-                swatch.onclick = () => applyHighlight(color);
+                // Use mousedown to prevent Safari from clearing selection
+                swatch.onmousedown = (e) => {
+                    e.preventDefault();
+                    applyHighlight(color);
+                };
                 highlightPalette.appendChild(swatch);
             });
         }
 
+        // Store selection for Safari compatibility
+        let savedSelection = null;
+
+        function saveSelection() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                savedSelection = selection.getRangeAt(0).cloneRange();
+            }
+        }
+
+        function restoreSelection() {
+            if (savedSelection) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedSelection);
+            }
+        }
+
         function toggleColorPicker(type) {
+            // Save current selection before opening dropdown
+            saveSelection();
+            
             const dropdown = document.getElementById(type === 'text' ? 'textColorDropdown' : 'highlightDropdown');
             const otherDropdown = document.getElementById(type === 'text' ? 'highlightDropdown' : 'textColorDropdown');
             
@@ -3664,8 +3693,16 @@
         }
 
         function applyTextColor(color) {
+            // Restore selection if it was lost (Safari fix)
+            if (!window.getSelection().toString() && savedSelection) {
+                restoreSelection();
+            }
+            
             const selection = window.getSelection();
-            if (!selection.rangeCount) return;
+            if (!selection.rangeCount) {
+                alert('Please select some text first');
+                return;
+            }
             
             const range = selection.getRangeAt(0);
             const selectedText = range.toString();
@@ -3691,12 +3728,22 @@
             if (preview) preview.style.background = color;
             if (dropdown) dropdown.classList.remove('show');
             
+            // Clear saved selection
+            savedSelection = null;
             saveCurrentChapter();
         }
 
         function applyHighlight(color) {
+            // Restore selection if it was lost (Safari fix)
+            if (!window.getSelection().toString() && savedSelection) {
+                restoreSelection();
+            }
+            
             const selection = window.getSelection();
-            if (!selection.rangeCount) return;
+            if (!selection.rangeCount) {
+                alert('Please select some text first');
+                return;
+            }
             
             const range = selection.getRangeAt(0);
             const selectedText = range.toString();
@@ -3728,6 +3775,8 @@
             if (preview) preview.style.background = color === 'transparent' ? '#ffffff' : color;
             if (dropdown) dropdown.classList.remove('show');
             
+            // Clear saved selection
+            savedSelection = null;
             saveCurrentChapter();
         }
 
